@@ -629,7 +629,7 @@ const LocationAnalysis = () => {
                     <Tabs index={activeTab} onChange={setActiveTab} isLazy>
                         <TabList borderBottom="2px" borderColor="gray.200">
                             <Tab _selected={{ borderBottomWidth: "4px", borderColor: "blue.600", color: "blue.600" }}>Location</Tab>
-                            <Tab _selected={{ borderBottomWidth: "4px", borderColor: "blue.600", color: "blue.600" }} isDisabled={!isLocationValid && !relocationId}>Rent Cost</Tab> {/* Diaktifkan jika lokasi valid atau ada relocationId */}
+                            <Tab _selected={{ borderBottomWidth: "4px", borderColor: "blue.600", color: "blue.600" }} isDisabled={!isLocationValid && !relocationId}>Monthly Cost</Tab> {/* Diaktifkan jika lokasi valid atau ada relocationId */}
                             <Tab _selected={{ borderBottomWidth: "4px", borderColor: "blue.600", color: "blue.600" }} isDisabled={!hasAnalysisRun}>KCP / ATM BJB</Tab>
                             <Tab _selected={{ borderBottomWidth: "4px", borderColor: "blue.600", color: "blue.600" }} isDisabled={!hasAnalysisRun}>ATM Bank lain</Tab>
                             <Tab _selected={{ borderBottomWidth: "4px", borderColor: "blue.600", color: "blue.600" }} isDisabled={!hasAnalysisRun}>Lokasi Umum</Tab>

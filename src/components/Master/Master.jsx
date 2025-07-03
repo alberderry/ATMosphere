@@ -37,7 +37,7 @@ const Master = () => {
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const [setTotalItems] = useState(0);
 
   const { isOpen: isDetailModalOpen, onOpen: onDetailModalOpen, onClose: onDetailModalClose } = useDisclosure();
   const { isOpen: isCreateModalOpen, onOpen: onCreateModalOpen, onClose: onCreateModalClose } = useDisclosure();
@@ -255,17 +255,18 @@ const Master = () => {
           </Box>
 
           {/* Select Filter */}
-          <Select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            maxW="200px"
-            borderRadius="25px"
-          >
-            <option value="all">All Types</option>
-            <option value="ATM">ATM</option>
-            <option value="CRM">CRM</option>
-          </Select>
-
+          <Box flex="none" ml="auto">
+            <Select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              maxW="200px"
+              borderRadius="25px"
+            >
+              <option value="all">All Types</option>
+              <option value="ATM">ATM</option>
+              <option value="CRM">CRM</option>
+            </Select>
+          </Box>
           {/* Add New Machine Button */}
           <Button colorScheme="blue" borderRadius="25px" onClick={onCreateModalOpen}>
             Add New Machine
@@ -294,11 +295,7 @@ const Master = () => {
         )}
 
         {/* Menampilkan jumlah total item (opsional, untuk mengatasi peringatan ESLint) */}
-        {!loading && !error && totalItems > 0 && (
-          <Text mb={4} textAlign="center" fontSize="sm" color="gray.600">
-            Menampilkan {atms.length} dari {totalItems} ATM
-          </Text>
-        )}
+        
 
         {!loading && !error && atms.length > 0 && (
           <SimpleGrid columns={{ base: 1, sm: 2, md: 2, lg: 2 }} spacing={6}>

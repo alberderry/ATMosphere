@@ -12,88 +12,117 @@ import {
     Button,
     Flex,
     useToast,
-    Select,
     FormControl,
     FormLabel,
     Spinner,
-    Center
+    Center,
+    Input,
+    InputGroup,
+    InputRightElement,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    useDisclosure,
+    List,
+    ListItem,
+    Divider,
 } from '@chakra-ui/react';
 import {
-    FaMoneyBillWave, // For Fee and Nominal
-    FaSyncAlt,       // For Volume
-    FaLandmark,      // For KCP / ATM BJB
-    FaBuilding,      // For ATM Bank Lain
-    FaMapMarkerAlt,  // For Lokasi Umum
-    FaEye,           // For View Icon
-    FaChevronDown    // For dropdown arrow
+    FaMoneyBillWave,
+    FaSyncAlt,
+    FaLandmark,
+    FaBuilding,
+    FaMapMarkerAlt,
+    FaSearch,
 } from 'react-icons/fa';
-import { useAuth } from '../../contexts/AuthContext'; // Import useAuth untuk token
+import { useAuth } from '../../contexts/AuthContext';
 
-// Base URL for API calls. Pastikan ini sesuai dengan setup environment Anda.
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 const HasilAnalisaTab = ({
     analysisResult,
+    initialInputAddress, // <--- PROP BARU DI SINI
 }) => {
     const toast = useToast();
     const { getAccessToken, isAuthenticated, getUserProfile } = useAuth();
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     const [atmList, setAtmList] = useState([]);
+    const [filteredAtmList, setFilteredAtmList] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [selectedAtmId, setSelectedAtmId] = useState('');
+    const [selectedAtmDetails, setSelectedAtmDetails] = useState(null);
     const [isAtmLoading, setIsAtmLoading] = useState(false);
     const [atmError, setAtmError] = useState(null);
-    const [isSaving, setIsSaving] = useState(false); // New state for save button loading
+    const [isSaving, setIsSaving] = useState(false);
 
     // --- DEBUGGING LOGS START ---
     useEffect(() => {
         console.log("HasilAnalisaTab rendered.");
-        console.log("analysisResult prop:", analysisResult);
+        console.log("initialInputAddress prop:", initialInputAddress); // Log the new prop
+        console.log("analysisResult prop (complete object):", analysisResult);
         if (analysisResult) {
+            console.log("analysisResult.address (direct):", analysisResult.address);
+            console.log("analysisResult.nearest_branches[0].address:", analysisResult.nearest_branches?.[0]?.address);
             console.log("analysisResult.breakdown_analysis:", analysisResult.breakdown_analysis);
             if (analysisResult.breakdown_analysis) {
                 console.log("analysisResult.breakdown_analysis.fee:", analysisResult.breakdown_analysis.fee);
                 console.log("analysisResult.breakdown_analysis.volume:", analysisResult.breakdown_analysis.volume);
                 console.log("analysisResult.breakdown_analysis.nominal:", analysisResult.breakdown_analysis.nominal);
             }
+            console.log("analysisResult.nearest_atms:", analysisResult.nearest_atms);
         }
-    }, [analysisResult]);
+    }, [analysisResult, initialInputAddress]); // Add initialInputAddress to deps
     // --- DEBUGGING LOGS END ---
 
 
-    // Pastikan analysisResult dan properti di dalamnya ada
-    // Menggunakan optional chaining dan nilai default untuk menghindari error
+    // --- MODIFIED: Effect to initialize selected ATM based on provided API response structure ---
+    useEffect(() => {
+        if (analysisResult && analysisResult.nearest_atms && analysisResult.nearest_atms.length > 0) {
+            const targetAtmFromResponse = analysisResult.nearest_atms[0];
+
+            if (selectedAtmId !== targetAtmFromResponse.id) {
+                console.log("Initializing selected ATM from analysisResult.nearest_atms[0]:", targetAtmFromResponse);
+                setSelectedAtmId(targetAtmFromResponse.id);
+                setSelectedAtmDetails(targetAtmFromResponse);
+                setSearchTerm(`${targetAtmFromResponse.code} - ${targetAtmFromResponse.name}`);
+            }
+        } else {
+            if (selectedAtmId !== '' || selectedAtmDetails !== null || searchTerm !== '') {
+                setSelectedAtmId('');
+                setSelectedAtmDetails(null);
+                setSearchTerm('');
+            }
+        }
+    }, [analysisResult, selectedAtmId, selectedAtmDetails, searchTerm]);
+
+
     const nearestBranchesCount = analysisResult?.nearest_branches?.length || 0;
     const nearestAtmsCount = analysisResult?.nearest_atms?.length || 0;
     const publicPlacesCount = analysisResult?.public_places?.length || 0;
     const nearestCompetitorAtmsCount = analysisResult?.nearest_competitor_atms?.length || 0;
 
-    // Gabungkan counts KCP dan ATM BJB dari data BJB
     const totalKcpAtmBjbFound = nearestBranchesCount + nearestAtmsCount;
-
-    // Ambil data breakdown_analysis
     const breakdownAnalysis = analysisResult?.breakdown_analysis;
 
-    // Pastikan nilai numerik sebelum memanggil toLocaleString
     const predictedFee = breakdownAnalysis?.fee !== undefined && breakdownAnalysis.fee !== null
         ? breakdownAnalysis.fee.toLocaleString('id-ID')
         : 'N/A';
     const predictedVolume = breakdownAnalysis?.volume !== undefined && breakdownAnalysis.volume !== null
         ? breakdownAnalysis.volume
-        : 0; // Default to 0 for calculations
+        : 0;
     const predictedNominal = breakdownAnalysis?.nominal !== undefined && breakdownAnalysis.nominal !== null
         ? breakdownAnalysis.nominal.toLocaleString('id-ID')
         : 'N/A';
-    // const predictedRevenue = breakdownAnalysis?.revenue || "0%";
 
-    // Ambil relocation_id dari analysisResult
-    const relocationId = analysisResult?.id; // Asumsi analysisResult memiliki properti 'id'
-
-    // Fungsi untuk menentukan Tier berdasarkan volume transaksi
     const getTierByVolume = (volume) => {
-        if (volume > 3600) return { tier: '1', gradient: 'linear-gradient(135deg, #4299E1 0%, #3182CE 100%)' }; // Biru
-        if (volume > 2000 && volume <= 3600) return { tier: '2', gradient: 'linear-gradient(135deg, #48BB78 0%, #38A169 100%)' }; // Hijau
-        if (volume > 1000 && volume <= 2000) return { tier: '3', gradient: 'linear-gradient(135deg, #ECC94B 0%, #D69E2E 100%)' }; // Kuning
-        return { tier: '4', gradient: 'linear-gradient(135deg, #F56565 0%, #E53E3E 100%)' }; // Merah
+        if (volume > 3600) return { tier: '1', gradient: 'linear-gradient(135deg, #4299E1 0%, #3182CE 100%)' };
+        if (volume > 2000 && volume <= 3600) return { tier: '2', gradient: 'linear-gradient(135deg, #48BB78 0%, #38A169 100%)' };
+        if (volume > 1000 && volume <= 2000) return { tier: '3', gradient: 'linear-gradient(135deg, #ECC94B 0%, #D69E2E 100%)' };
+        return { tier: '4', gradient: 'linear-gradient(135deg, #F56565 0%, #E53E3E 100%)' };
     };
 
     const { tier, gradient } = getTierByVolume(predictedVolume);
@@ -105,8 +134,8 @@ const HasilAnalisaTab = ({
         return "Kurang Berpotensi";
     };
 
+    const relocationId = analysisResult?.id;
 
-    // Fungsi untuk mengambil daftar ATM dari API
     const fetchATMs = useCallback(async () => {
         setIsAtmLoading(true);
         setAtmError(null);
@@ -118,8 +147,7 @@ const HasilAnalisaTab = ({
                 throw new Error("Pengguna tidak terautentikasi atau profil tidak lengkap.");
             }
 
-            const branchId = userProfileData?.branch_id?.id || 6;
-            const response = await fetch(`${BASE_URL}/atms?branch_id=${branchId}`, {
+            const response = await fetch(`${BASE_URL}/atms?limit=99999`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -134,7 +162,10 @@ const HasilAnalisaTab = ({
             }
 
             const result = await response.json();
-            setAtmList(result.data?.atms || []);
+            const fetchedAtms = result.data?.atms || [];
+            console.log("Fetched ATM list:", fetchedAtms);
+
+            setAtmList(fetchedAtms);
         } catch (err) {
             console.error("Error fetching ATMs:", err);
             setAtmError(err.message || "Gagal memuat daftar ATM.");
@@ -151,14 +182,49 @@ const HasilAnalisaTab = ({
         }
     }, [getAccessToken, isAuthenticated, getUserProfile, toast]);
 
-    // Effect untuk memuat ATM saat komponen dimuat
     useEffect(() => {
         if (isAuthenticated) {
             fetchATMs();
         }
     }, [isAuthenticated, fetchATMs]);
 
-    // Fungsi untuk mengirim data ke API /save-relocation setelah memilih ATM
+    useEffect(() => {
+        if (searchTerm.length > 0) {
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+            const filtered = atmList.filter(atm =>
+                atm.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                atm.code.toLowerCase().includes(lowerCaseSearchTerm) ||
+                (atm.branch_id && atm.branch_id.name.toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (atm.branch_id && atm.branch_id.parent_id && atm.branch_id.parent_id.name.toLowerCase().includes(lowerCaseSearchTerm)) ||
+                atm.address.toLowerCase().includes(lowerCaseSearchTerm)
+            );
+            setFilteredAtmList(filtered.slice(0, 100));
+        } else {
+            setFilteredAtmList(atmList.slice(0, 100));
+        }
+    }, [searchTerm, atmList]);
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleSelectAtm = (atm) => {
+        setSelectedAtmId(atm.id);
+        setSelectedAtmDetails(atm);
+        setSearchTerm(`${atm.code} - ${atm.name}`);
+        onClose();
+    };
+
+    const handleOpenSearchModal = () => {
+        if (atmList.length === 0 && !isAtmLoading) {
+            fetchATMs();
+        }
+        setSearchTerm(selectedAtmDetails ? `${selectedAtmDetails.code} - ${selectedAtmDetails.name}` : '');
+        setFilteredAtmList(atmList.slice(0, 100));
+        onOpen();
+    };
+
+
     const handleSave = async () => {
         if (!relocationId) {
             toast({
@@ -175,7 +241,7 @@ const HasilAnalisaTab = ({
         if (!selectedAtmId) {
             toast({
                 title: "Peringatan",
-                description: "Silakan pilih ATM terlebih dahulu.",
+                description: "Silakan pilih ATM target dari daftar yang muncul atau cari terlebih dahulu.",
                 status: "warning",
                 duration: 3000,
                 isClosable: true,
@@ -184,7 +250,7 @@ const HasilAnalisaTab = ({
             return;
         }
 
-        setIsSaving(true); // Set loading state for save button
+        setIsSaving(true);
         setAtmError(null);
         try {
             const token = getAccessToken();
@@ -193,7 +259,7 @@ const HasilAnalisaTab = ({
             }
 
             const payload = {
-                atm_id: parseInt(selectedAtmId), // Pastikan atm_id adalah integer
+                atm_id: parseInt(selectedAtmId),
                 relocation_id: relocationId,
             };
             console.log("Sending save-relocation payload:", payload);
@@ -235,7 +301,7 @@ const HasilAnalisaTab = ({
                 position: "bottom-right"
             });
         } finally {
-            setIsSaving(false); // Reset loading state
+            setIsSaving(false);
         }
     };
 
@@ -252,7 +318,12 @@ const HasilAnalisaTab = ({
                         <Card boxShadow="sm" borderRadius="20px" bg="white" border="1px solid gray">
                             <CardBody p={4} minWidth={600}>
                                 <Text fontSize="md" fontWeight="medium" noOfLines={2}>
-                                    {analysisResult?.nearest_branches?.[0]?.address || 'Alamat Lokasi Tidak Tersedia'}
+                                    {/* PRIORITAS: initialInputAddress (dari request body)
+                                        FALLBACK 1: analysisResult.address (dari respons API edit/analisis)
+                                        FALLBACK 2: nearest_branches[0].address (jika tidak ada yang lain)
+                                        FALLBACK 3: Default message
+                                    */}
+                                    {initialInputAddress || analysisResult?.address || analysisResult?.nearest_branches?.[0]?.address || 'Alamat Lokasi Tidak Tersedia'}
                                 </Text>
                             </CardBody>
                         </Card>
@@ -263,7 +334,6 @@ const HasilAnalisaTab = ({
                     </Text>
 
                     <VStack align="stretch" spacing={4}>
-                        {/* Fee Transaction Prediction */}
                         <Card boxShadow="sm" borderRadius="20px" bg="white" border="1px solid gray">
                             <CardBody p={4}>
                                 <HStack justifyContent="space-between" alignItems="center">
@@ -283,7 +353,6 @@ const HasilAnalisaTab = ({
                             </CardBody>
                         </Card>
 
-                        {/* Volume Transaction Prediction */}
                         <Card boxShadow="sm" borderRadius="20px" bg="white" border="1px solid gray">
                             <CardBody p={4}>
                                 <HStack justifyContent="space-between" alignItems="center">
@@ -303,7 +372,6 @@ const HasilAnalisaTab = ({
                             </CardBody>
                         </Card>
 
-                        {/* Nominal Transaction Prediction */}
                         <Card boxShadow="sm" borderRadius="20px" bg="white" border="1px solid gray">
                             <CardBody p={4}>
                                 <HStack justifyContent="space-between" alignItems="center">
@@ -324,47 +392,46 @@ const HasilAnalisaTab = ({
                         </Card>
                     </VStack>
 
-                    {/* Target Relokasi Section - ATM selection moved here */}
+                    {/* Target Relokasi Section - Trigger button for Modal */}
                     <VStack align="stretch" spacing={4} mt={8}>
                         <Text fontSize="lg" fontWeight="bold">
                             Target relokasi
                         </Text>
                         <FormControl>
-                            <FormLabel htmlFor="atm-select-target">Pilih ATM:</FormLabel>
-                            <Select
-                                id="atm-select-target"
-                                placeholder={isAtmLoading ? "Loading ATMs..." : atmError ? "Error loading ATMs" : "Pilih ATM..."}
-                                value={selectedAtmId}
-                                onChange={(e) => setSelectedAtmId(e.target.value)}
-                                size="lg"
-                                borderRadius="md"
-                                icon={<FaChevronDown />}
-                                isDisabled={isAtmLoading || atmList.length === 0}
-                                border="1px solid"
-                                borderColor="gray.200"
-                                boxShadow="sm"
-                                _hover={{ borderColor: "gray.300", boxShadow: "md" }}
-                                _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
-                            >
-                                {isAtmLoading ? (
-                                    <option value="" disabled>Loading ATMs...</option>
-                                ) : atmError ? (
-                                    <option value="" disabled>Error loading ATMs</option>
-                                ) : atmList.length === 0 ? (
-                                    <option value="" disabled>No ATMs available</option>
-                                ) : (
-                                    atmList.map((atm) => (
-                                        <option key={atm.id} value={atm.id}>
-                                            {atm.code} - {atm.name} ({atm.address})
-                                        </option>
-                                    ))
-                                )}
-                            </Select>
-                            {isAtmLoading && (
-                                <Center mt={2}>
-                                    <Spinner size="sm" color="blue.500" /> <Text ml={2} fontSize="sm" color="gray.500">Loading ATM list...</Text>
-                                </Center>
+                            <FormLabel htmlFor="atm-search-button">Pilih ATM Target:</FormLabel>
+                            <InputGroup>
+                                <Input
+                                    id="atm-search-button"
+                                    placeholder="Klik untuk mencari ATM..."
+                                    value={selectedAtmDetails ? `${selectedAtmDetails.code} - ${selectedAtmDetails.name} (${selectedAtmDetails.address})` : ''}
+                                    isReadOnly
+                                    onClick={handleOpenSearchModal}
+                                    cursor="pointer"
+                                    size="lg"
+                                    bg="white"
+                                    borderRadius="md"
+                                    boxShadow="sm"
+                                    pr="4.5rem"
+                                />
+                                <InputRightElement width="4.5rem">
+                                    <Button h="1.75rem" size="sm" onClick={handleOpenSearchModal} isLoading={isAtmLoading}>
+                                        <Icon as={FaSearch} />
+                                    </Button>
+                                </InputRightElement>
+                            </InputGroup>
+
+                            {/* Display selected ATM details below the input */}
+                            {selectedAtmDetails && (
+                                <Box mt={4} p={3} borderWidth="1px" borderRadius="md" bg="blue.50" borderColor="blue.200">
+                                    <Text fontWeight="bold">ATM Terpilih:</Text>
+                                    <Text>Kode: {selectedAtmDetails.code}</Text>
+                                    <Text>Nama: {selectedAtmDetails.name}</Text>
+                                    <Text>Alamat: {selectedAtmDetails.address}</Text>
+                                    <Text>Cabang: {selectedAtmDetails.branch_id?.name || 'N/A'}</Text>
+                                    <Text>Kanwil: {selectedAtmDetails.branch_id?.parent_id?.name || 'N/A'}</Text>
+                                </Box>
                             )}
+
                             {atmError && (
                                 <Text color="red.500" fontSize="sm" mt={2}>{atmError}</Text>
                             )}
@@ -374,9 +441,7 @@ const HasilAnalisaTab = ({
 
                 {/* Right Column: Location Counts & Overall Prediction */}
                 <VStack align="end" spacing={6}>
-                    {/* Location Counts */}
                     <VStack align="stretch" spacing={3}>
-                        {/* KCP / ATM BJB */}
                         <Card boxShadow="sm" minWidth={350} borderRadius="20px" bg="white" border="1px solid gray">
                             <CardBody p={4}>
                                 <HStack justifyContent="space-between" alignItems="center">
@@ -388,12 +453,10 @@ const HasilAnalisaTab = ({
                                     </HStack>
                                     <HStack>
                                         <Text fontWeight="bold">{totalKcpAtmBjbFound} Found</Text>
-                                        
                                     </HStack>
                                 </HStack>
                             </CardBody>
                         </Card>
-                        {/* ATM Bank Lain */}
                         <Card boxShadow="sm" borderRadius="20px" bg="white" border="1px solid gray">
                             <CardBody p={4}>
                                 <HStack justifyContent="space-between" alignItems="center">
@@ -405,12 +468,10 @@ const HasilAnalisaTab = ({
                                     </HStack>
                                     <HStack>
                                         <Text fontWeight="bold">{nearestCompetitorAtmsCount} Found</Text>
-                                        
                                     </HStack>
                                 </HStack>
                             </CardBody>
                         </Card>
-                        {/* Lokasi Umum */}
                         <Card boxShadow="sm" borderRadius="20px" bg="white" border="1px solid gray">
                             <CardBody p={4}>
                                 <HStack justifyContent="space-between" alignItems="center">
@@ -422,14 +483,12 @@ const HasilAnalisaTab = ({
                                     </HStack>
                                     <HStack>
                                         <Text fontWeight="bold">{publicPlacesCount} Found</Text>
-                                        
                                     </HStack>
                                 </HStack>
                             </CardBody>
                         </Card>
                     </VStack>
 
-                    {/* Overall Prediction Card */}
                     <Card bg={gradient} color="white" borderRadius="25px" p={6} textAlign="center" boxShadow="lg">
                         <CardBody>
                             <Text textAlign={"left"} fontSize="sm" fontWeight="normal">Prediction</Text>
@@ -449,8 +508,8 @@ const HasilAnalisaTab = ({
                                 boxShadow="md"
                                 _hover={{ boxShadow: "lg", transform: "translateY(-2px)" }}
                                 _active={{ boxShadow: "sm", transform: "translateY(0)" }}
-                                isDisabled={!selectedAtmId || isSaving || isAtmLoading} // Disable if no ATM is selected, saving, or ATM list is loading
-                                isLoading={isSaving} // Show loading spinner on the button when saving
+                                isDisabled={!selectedAtmId || isSaving || isAtmLoading}
+                                isLoading={isSaving}
                             >
                                 Save
                             </Button>
@@ -458,6 +517,67 @@ const HasilAnalisaTab = ({
                     </Card>
                 </VStack>
             </Grid>
+
+            {/* --- ATM Search Modal --- */}
+            <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
+                <ModalOverlay />
+                <ModalContent borderRadius="md">
+                    <ModalHeader borderBottomWidth="1px">Cari ATM Target Relokasi</ModalHeader>
+                    <ModalBody>
+                        <FormControl mb={4}>
+                            <FormLabel htmlFor="modal-atm-search">Cari berdasarkan:</FormLabel>
+                            <Input
+                                id="modal-atm-search"
+                                placeholder="Kanwil, Kode ATM, Cabang, Alamat..."
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                size="md"
+                            />
+                        </FormControl>
+
+                        {isAtmLoading && atmList.length === 0 ? (
+                            <Center py={10}>
+                                <Spinner size="lg" color="blue.500" />
+                                <Text ml={4} fontSize="lg" color="gray.600">Memuat daftar ATM...</Text>
+                            </Center>
+                        ) : atmError ? (
+                            <Center py={10}>
+                                <Text color="red.500" fontSize="md">{atmError}</Text>
+                            </Center>
+                        ) : filteredAtmList.length === 0 && searchTerm.length > 0 ? (
+                            <Center py={10}>
+                                <Text color="gray.500" fontSize="md">Tidak ditemukan ATM yang cocok dengan "{searchTerm}".</Text>
+                            </Center>
+                        ) : (
+                            <List spacing={0}>
+                                {filteredAtmList.map((atm) => (
+                                    <React.Fragment key={atm.id}>
+                                        <ListItem
+                                            p={3}
+                                            _hover={{ bg: 'blue.50', cursor: 'pointer' }}
+                                            onClick={() => handleSelectAtm(atm)}
+                                        >
+                                            <Text fontWeight="semibold">{atm.code} - {atm.name}</Text>
+                                            <Text fontSize="sm" color="gray.600" noOfLines={1}>
+                                                {atm.address}
+                                            </Text>
+                                            <Text fontSize="xs" color="gray.500">
+                                                {atm.branch_id?.name || 'N/A'} (Kanwil: {atm.branch_id?.parent_id?.name || 'N/A'})
+                                            </Text>
+                                        </ListItem>
+                                        <Divider my={0} />
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        )}
+                    </ModalBody>
+                    <ModalFooter borderTopWidth="1px">
+                        <Button colorScheme="blue" mr={3} onClick={onClose}>
+                            Tutup
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </TabPanel>
     );
 };

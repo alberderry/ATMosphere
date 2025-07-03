@@ -69,7 +69,7 @@ const ATMListItemCard = ({ atm, onViewDetails, isActive }) => {
             <Icon as={FaMoneyBillAlt} w={6} h={6} color={iconColor} />
           </Flex>
           <VStack align="flex-start" spacing={0}>
-            <Text fontSize="sm" color={textColor === "white" ? "whiteAlpha.700" : "gray.600"}>{atm.typeAtm}</Text> 
+            <Text fontSize="sm" color={textColor === "white" ? "whiteAlpha.700" : "gray.600"}>{atm.namaAtm}</Text> 
             <Text fontSize="lg" fontWeight="semibold">{atm.kodeAtm}</Text>
           </VStack>
         </HStack>

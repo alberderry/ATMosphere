@@ -124,7 +124,7 @@ const Header = ({ selectedPeriod, setSelectedPeriod }) => {
   const getPageTitle = () => {
     if (location.pathname.includes('analytics/trx-fee')) return 'Performance Reports';
     if (location.pathname.includes('analytics/map-view')) return 'Map View Analytics';
-    if (location.pathname.includes('master')) return 'Master';
+    if (location.pathname.includes('master')) return 'Master Data';
     if (location.pathname.includes('analytics/cba')) return 'Cost Benefit Analysis';
     if (location.pathname.includes('action/cba-simulation')) return 'Relocation Simulation';
     if (location.pathname.includes('action/submission')) return 'Relocation Submission';

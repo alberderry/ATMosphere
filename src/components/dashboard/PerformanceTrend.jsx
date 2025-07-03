@@ -40,6 +40,27 @@ const CustomDiamondDot = (props) => {
   );
 };
 
+// --- FUNGSI HELPER BARU UNTUK FORMATTING ---
+// Fungsi untuk memformat angka menjadi Rupiah
+const formatToRupiah = (value) => {
+  if (value === null || value === undefined) return 'N/A';
+  // Menggunakan Intl.NumberFormat untuk pemformatan mata uang Indonesia
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0, // Tidak ada desimal untuk Rupiah bulat
+    maximumFractionDigits: 0, // Tidak ada desimal untuk Rupiah bulat
+  }).format(value);
+};
+
+// Fungsi untuk memformat angka biasa (misal: jumlah transaksi)
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return 'N/A';
+  // Menggunakan Intl.NumberFormat untuk ribuan separator
+  return new Intl.NumberFormat('id-ID').format(value);
+};
+// --- AKHIR FUNGSI HELPER BARU ---
+
 const PerformanceTrend = ({ data, loading, error, cardBg }) => {
   // Memproses data untuk menghitung netAmount (jumlah total dikurangi fee)
   // Ini memungkinkan 'Fee' ditampilkan di dalam total 'Amount'
@@ -138,6 +159,19 @@ const PerformanceTrend = ({ data, loading, error, cardBg }) => {
                     borderRadius: "8px",
                     boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                   }}
+                  // --- PERUBAHAN DI SINI: MENAMBAHKAN FORMATTER ---
+                  formatter={(value, name) => {
+                    // 'name' adalah nama yang Anda definisikan di prop 'name' pada Bar/Area components
+                    if (name === "Fee" || name === "Nominal Transaction") {
+                      return formatToRupiah(value);
+                    } else if (name === "Transaction") {
+                      return formatNumber(value);
+                    }
+                    return value; // Fallback jika ada dataKey lain yang tidak diformat
+                  }}
+                  // Opsional: Anda juga bisa memformat label (dataKey dari XAxis)
+                  labelFormatter={(label) => `Periode: ${label}`}
+                  // --- AKHIR PERUBAHAN ---
                 />
                 <Legend />
                 {/* Bar "Fee" (bagian bawah stack) */}
@@ -147,9 +181,8 @@ const PerformanceTrend = ({ data, loading, error, cardBg }) => {
                   stackId="a" // Stack ID yang sama agar menumpuk
                   fill="url(#feeGradient)" // Menggunakan gradien kuning
                   filter="url(#feeGlow)" // Menerapkan glow
-                  name="Fee"
+                  name="Fee" // Pastikan nama ini sesuai dengan yang dicek di formatter
                   barSize={40} // Ukuran bar diset ke 25px
-                  // Radius bawah rata, radius atas rata karena ada bar di atasnya
                   radius={[0, 0, 0, 0]}
                 />
                 {/* Bar "Net Amount" (bagian atas stack) */}
@@ -159,9 +192,8 @@ const PerformanceTrend = ({ data, loading, error, cardBg }) => {
                   stackId="a" // Stack ID yang sama agar menumpuk
                   fill="url(#netAmountGradient)" // Menggunakan gradien biru
                   filter="url(#netAmountGlow)" // Menerapkan glow
-                  name="Amount (Net)" // Nama di legend
+                  name="Nominal Transaction" // Pastikan nama ini sesuai dengan yang dicek di formatter
                   barSize={40} // Ukuran bar diset ke 25px
-                  // Radius atas membulat, radius bawah rata karena ada bar di bawahnya
                   radius={[4, 4, 0, 0]}
                 />
                 {/* Area "Transaction" (Area Chart) - Dipindahkan ke bawah agar dirender di depan */}
@@ -172,7 +204,7 @@ const PerformanceTrend = ({ data, loading, error, cardBg }) => {
                   stroke="#82ca9d"
                   strokeWidth={4} // Tebalkan garis
                   fill="url(#transactionGradient)"
-                  name="Transaction"
+                  name="Transaction" // Pastikan nama ini sesuai dengan yang dicek di formatter
                   dot={<CustomDiamondDot stroke="#82ca9d" fill="white" />} // Menggunakan komponen dot kustom
                 />
               </ComposedChart>

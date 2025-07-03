@@ -91,37 +91,40 @@ export const AuthProvider = ({ children }) => {
 
     // Fungsi untuk mengambil data profil pengguna dari API
     const fetchUserProfile = async (accessToken) => {
-        try {
-            const response = await fetch(`${BASE_URL}/users`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                    'ngrok-skip-browser-warning': 'true',
-                },
-            });
+    try {
+        const response = await fetch(`${BASE_URL}/users`, { // Panggilan ke endpoint /users
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+                'ngrok-skip-browser-warning': 'true',
+            },
+        });
 
-            const data = await response.json();
+        const data = await response.json(); // Menguraikan respons JSON
 
-            if (response.ok && data.data) {
-                setUserProfile(data.data);
-                setUserId(data.data.id);
-                localStorage.setItem(USER_PROFILE_DATA_KEY, JSON.stringify(data.data)); 
-                localStorage.setItem(USER_ID_KEY, data.data.id); 
+        // KONDISI UTAMA KEBERHASILAN: response.ok HARUS true DAN data.data HARUS ADA
+        if (response.ok && data.data) { 
+            setUserProfile(data.data);
+            setUserId(data.data.id);
+            localStorage.setItem(USER_PROFILE_DATA_KEY, JSON.stringify(data.data)); 
+            localStorage.setItem(USER_ID_KEY, data.data.id); 
 
-                console.log("Data profil pengguna berhasil dimuat dan disimpan:", data.data);
-                return true;
-            } else {
-                console.error("Gagal memuat data profil pengguna:", data.message || "Unknown error");
-                setError("Gagal memuat data profil pengguna.");
-                return false;
-            }
-        } catch (err) {
-            console.error("Kesalahan jaringan saat memuat profil pengguna:", err);
-            setError("Terjadi kesalahan jaringan saat memuat profil pengguna.");
-            return false;
+            console.log("Data profil pengguna berhasil dimuat dan disimpan:", data.data);
+            return true; // Berhasil
+        } else { 
+            // Kondisi GAGAL 1: Respons tidak OK (misal: 401, 403, 500) ATAU data.data tidak ada
+            console.error("Gagal memuat data profil pengguna:", data.message || "Unknown error");
+            setError("Gagal memuat data profil pengguna.");
+            return false; // Gagal
         }
-    };
+    } catch (err) { 
+        // Kondisi GAGAL 2: Error jaringan (misal: server tidak respons) atau gagal parse JSON
+        console.error("Kesalahan jaringan saat memuat profil pengguna:", err);
+        setError("Terjadi kesalahan jaringan saat memuat profil pengguna.");
+        return false; // Gagal
+    }
+};
 
     const login = async (email, password) => {
         setIsLoading(true);

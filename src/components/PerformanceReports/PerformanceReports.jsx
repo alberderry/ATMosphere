@@ -128,6 +128,7 @@ const PerformanceReports = ({ selectedPeriod }) => {
               id: item.atm_id.id, 
               kodeAtm: item.atm_id.code,
               typeAtm: item.atm_id.type,
+              namaAtm: item.atm_id.name,
               atm_branch_id: item.atm_id.branch_id?.id, // Ensure this is correctly extracted
               kodeCabang: item.atm_id.branch_id?.branch_code?.toString() || 'N/A', 
               kodeCabangInduk: item.atm_id.branch_id?.parent_id?.branch_code?.toString() || 'N/A', 
@@ -310,7 +311,7 @@ const PerformanceReports = ({ selectedPeriod }) => {
           <Box flex="1" />
           <VStack align="stretch" spacing={2} flex="1">
             <HStack justify="flex-end" spacing={2}>
-              <Button colorScheme="blue" size="md" borderRadius="25px">Filter</Button>
+             
               <Button colorScheme="blue" size="md" borderRadius="25px" onClick={handleExport}>Export</Button>
             </HStack>
             <HStack

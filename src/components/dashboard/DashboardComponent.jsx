@@ -198,7 +198,7 @@ const DashboardComponent = ({ selectedPeriod }) => {
             iconFgColor: 'yellow'
           },
           {
-            label: 'Total Amount',
+            label: 'Total Nominal Transaction',
             value: formatRupiah(currentApiData.total_amount),
             growth: formatPercentageChange(currentApiData.total_amount || 0, previousApiData?.total_amount || 0).growth,
             color: formatPercentageChange(currentApiData.total_amount || 0, previousApiData?.total_amount || 0).color,

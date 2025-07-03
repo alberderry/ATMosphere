@@ -77,11 +77,11 @@ const Submission = () => {
             }
 
             const branchId = userProfile?.branch_id?.id;
-            let apiUrl = `${BASE_URL}/relocations?page=1&limit=100`;
+            let apiUrl = `${BASE_URL}/relocations?page=1&limit=99999`;
             if (branchId) {
                 apiUrl += `&branch_id=${branchId}`;
             }
-
+            
             const response = await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
@@ -400,7 +400,7 @@ const Submission = () => {
                                 <Card
                                     key={item.id}
                                     boxShadow="sm"
-                                    borderRadius="lg"
+                                    borderRadius="25px"
                                     bg="white"
                                     cursor="pointer"
                                     _hover={{ boxShadow: "md", transform: "translateY(-2px)" }}
@@ -412,7 +412,7 @@ const Submission = () => {
                                             <HStack alignItems="center" flexShrink={0}>
                                                 <Card
                                                     bg="purple.100"
-                                                    borderRadius="md"
+                                                    borderRadius="25px"
                                                     p={3}
                                                     mr={4}
                                                     display="flex"
