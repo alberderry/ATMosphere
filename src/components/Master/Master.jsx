@@ -96,7 +96,7 @@ const Master = () => {
       // --- PERBAIKI BAGIAN INI ---
       // Ambil total_row dari page_info
       const totalCountFromApi = response.data.data.page_info?.total_row || 0; 
-      setTotalItems(totalCountFromApi);
+      
       // Hitung total pages berdasarkan total_row dan ITEMS_PER_PAGE
       setTotalPages(Math.ceil(totalCountFromApi / ITEMS_PER_PAGE) || 1); 
       // --- AKHIR PERBAIKAN ---

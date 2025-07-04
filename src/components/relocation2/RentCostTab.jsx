@@ -53,7 +53,7 @@ const RentCostTab = ({
                     <GridItem>
                         <FormControl id="machineCost" isInvalid={error && isNaN(parseFloat(machineCostInput))}>
                             <FormLabel color="blue.600" fontWeight="medium">
-                                Biaya Sewa Mesin (Rp)
+                                Machine Rental Cost (Rp)
                             </FormLabel>
                             <Input
                                 type="number" // Menggunakan type number untuk input numerik
@@ -69,7 +69,7 @@ const RentCostTab = ({
                     <GridItem>
                         <FormControl id="rentCost" isInvalid={error && isNaN(parseFloat(rentCostInput))}>
                             <FormLabel color="blue.600" fontWeight="medium">
-                                Biaya Sewa Tempat (Rp)
+                                Facility Rental Cost (Rp)
                             </FormLabel>
                             <Input
                                 type="number" // Menggunakan type number
@@ -85,7 +85,7 @@ const RentCostTab = ({
                     <GridItem>
                         <FormControl id="electricityCost" isInvalid={error && isNaN(parseFloat(electricityCostInput))}>
                             <FormLabel color="blue.600" fontWeight="medium">
-                                Biaya Listrik (Rp)
+                                Electricity Cost (Rp)
                             </FormLabel>
                             <Input
                                 type="number" // Menggunakan type number
@@ -101,7 +101,7 @@ const RentCostTab = ({
                     <GridItem>
                         <FormControl id="isiUlangCost" isInvalid={error && isNaN(parseFloat(isiUlangCostInput))}>
                             <FormLabel color="blue.600" fontWeight="medium">
-                                Biaya Isi Ulang (Rp)
+                                Cash Replenishment Cost (Rp)
                             </FormLabel>
                             <Input
                                 type="number" // Menggunakan type number

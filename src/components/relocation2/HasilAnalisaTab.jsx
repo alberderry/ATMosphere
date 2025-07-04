@@ -1,4 +1,6 @@
+// components/HasilAnalisaTab.jsx
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation, useParams } from 'react-router-dom'; // Import useParams
 import {
     TabPanel,
     VStack,
@@ -42,13 +44,12 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
-const HasilAnalisaTab = ({
-    analysisResult,
-    initialInputAddress, // <--- PROP BARU DI SINI
-}) => {
+const HasilAnalisaTab = ({ analysisResult }) => {
     const toast = useToast();
     const { getAccessToken, isAuthenticated, getUserProfile } = useAuth();
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const location = useLocation();
+    const { relocationId: urlRelocationId } = useParams(); // Get relocationId from URL params
 
     const [atmList, setAtmList] = useState([]);
     const [filteredAtmList, setFilteredAtmList] = useState([]);
@@ -58,47 +59,77 @@ const HasilAnalisaTab = ({
     const [isAtmLoading, setIsAtmLoading] = useState(false);
     const [atmError, setAtmError] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isAccepting, setIsAccepting] = useState(false);
+    const [isRejecting, setIsRejecting] = useState(false);
 
-    // --- DEBUGGING LOGS START ---
+    // Determine if it's edit mode based on the URL parameter
+    const isEditMode = location.pathname.includes('/edit/');
+
+    // Get user profile once
+    const userProfile = getUserProfile();
+    const canApproveReject = userProfile?.branch_id?.id === 0;
+
+    // Use analysisResult.id if available, otherwise fallback to URL param
+    const relocationId = analysisResult?.id || urlRelocationId;
+
+
+    // --- EFFECT FOR INITIAL ATM SELECTION BASED ON URL OR PASSED STATE ---
     useEffect(() => {
-        console.log("HasilAnalisaTab rendered.");
-        console.log("initialInputAddress prop:", initialInputAddress); // Log the new prop
-        console.log("analysisResult prop (complete object):", analysisResult);
-        if (analysisResult) {
-            console.log("analysisResult.address (direct):", analysisResult.address);
-            console.log("analysisResult.nearest_branches[0].address:", analysisResult.nearest_branches?.[0]?.address);
-            console.log("analysisResult.breakdown_analysis:", analysisResult.breakdown_analysis);
-            if (analysisResult.breakdown_analysis) {
-                console.log("analysisResult.breakdown_analysis.fee:", analysisResult.breakdown_analysis.fee);
-                console.log("analysisResult.breakdown_analysis.volume:", analysisResult.breakdown_analysis.volume);
-                console.log("analysisResult.breakdown_analysis.nominal:", analysisResult.breakdown_analysis.nominal);
+        console.log("--- HasilAnalisaTab useEffect for ATM selection triggered ---");
+        console.log("Current URL pathname:", location.pathname, "Is Edit Mode:", isEditMode);
+        console.log("analysisResult (inside useEffect):", analysisResult);
+        console.log("location.state:", location.state); // Log the entire state object
+
+        if (isEditMode) {
+            console.log("Edit mode detected.");
+            let initialAtmDetails = null;
+            let initialAtmId = '';
+
+            // Prioritize ATM from analysisResult if available
+            if (analysisResult && analysisResult.atm) {
+                console.log("Using analysisResult.atm for initial selection.");
+                initialAtmDetails = analysisResult.atm;
+                initialAtmId = analysisResult.atm.id;
+            } else if (location.state && location.state.atmId) {
+                // Fallback to location.state.atmId if analysisResult.atm is not present
+                console.log("Using location.state.atmId for initial selection.");
+                initialAtmId = location.state.atmId;
+                // If we only have atmId, we might need to fetch full ATM details
+                // This would require an additional fetch or ensuring `analysisResult.atm` is always populated correctly on load.
+                // For now, we'll assume `analysisResult.atm` comes correctly when detail is fetched.
+                // If not, you'd need a `fetchAtmDetailsById` function here.
+            } else {
+                console.log("No initial ATM data from analysisResult or location.state.");
             }
-            console.log("analysisResult.nearest_atms:", analysisResult.nearest_atms);
-        }
-    }, [analysisResult, initialInputAddress]); // Add initialInputAddress to deps
-    // --- DEBUGGING LOGS END ---
 
-
-    // --- MODIFIED: Effect to initialize selected ATM based on provided API response structure ---
-    useEffect(() => {
-        if (analysisResult && analysisResult.nearest_atms && analysisResult.nearest_atms.length > 0) {
-            const targetAtmFromResponse = analysisResult.nearest_atms[0];
-
-            if (selectedAtmId !== targetAtmFromResponse.id) {
-                console.log("Initializing selected ATM from analysisResult.nearest_atms[0]:", targetAtmFromResponse);
-                setSelectedAtmId(targetAtmFromResponse.id);
-                setSelectedAtmDetails(targetAtmFromResponse);
-                setSearchTerm(`${targetAtmFromResponse.code} - ${targetAtmFromResponse.name}`);
+            if (initialAtmDetails) {
+                setSelectedAtmDetails(initialAtmDetails);
+                setSelectedAtmId(initialAtmId);
+                setSearchTerm(`${initialAtmDetails.code} - ${initialAtmDetails.name} (${initialAtmDetails.address})`);
+                console.log("selectedAtmDetails set to:", initialAtmDetails);
+                console.log("searchTerm set to:", `${initialAtmDetails.code} - ${initialAtmDetails.name} (${initialAtmDetails.address})`);
+            } else if (initialAtmId) {
+                 // If we have an ATM ID but no full details (e.g., from location.state.atmId),
+                 // we should fetch the details here to populate the display.
+                 console.log(`ATM ID ${initialAtmId} found from state, but no full details. Consider fetching.`);
+                 // You would need a function like this:
+                 // fetchAtmDetailsById(initialAtmId).then(details => {
+                 //     setSelectedAtmDetails(details);
+                 //     setSelectedAtmId(initialAtmId);
+                 //     setSearchTerm(`${details.code} - ${details.name} (${details.address})`);
+                 // }).catch(err => console.error("Failed to fetch ATM details:", err));
+            } else {
+                console.log("No specific ATM pre-selection in edit mode.");
             }
         } else {
-            if (selectedAtmId !== '' || selectedAtmDetails !== null || searchTerm !== '') {
-                setSelectedAtmId('');
-                setSelectedAtmDetails(null);
-                setSearchTerm('');
-            }
+            console.log("New analysis mode. Clearing selected ATM details and search term.");
+            setSelectedAtmDetails(null);
+            setSelectedAtmId('');
+            setSearchTerm('');
         }
-    }, [analysisResult, selectedAtmId, selectedAtmDetails, searchTerm]);
+    }, [location.pathname, location.state, analysisResult, isEditMode]); // Add location.state to dependency array
 
+    // ... (rest of your HasilAnalisaTab.jsx component code)
 
     const nearestBranchesCount = analysisResult?.nearest_branches?.length || 0;
     const nearestAtmsCount = analysisResult?.nearest_atms?.length || 0;
@@ -134,7 +165,10 @@ const HasilAnalisaTab = ({
         return "Kurang Berpotensi";
     };
 
-    const relocationId = analysisResult?.id;
+    // The relocationId is now derived from either `analysisResult.id` or `urlRelocationId`
+    // const relocationId = analysisResult?.id; // This line should be replaced or augmented
+    // It's already defined above as `const relocationId = analysisResult?.id || urlRelocationId;`
+
 
     const fetchATMs = useCallback(async () => {
         setIsAtmLoading(true);
@@ -147,7 +181,19 @@ const HasilAnalisaTab = ({
                 throw new Error("Pengguna tidak terautentikasi atau profil tidak lengkap.");
             }
 
-            const response = await fetch(`${BASE_URL}/atms?limit=99999`, {
+            const branchId = userProfileData.branch_id?.id;
+            console.log("User's branch_id:", branchId);
+
+            let url = `${BASE_URL}/atms?limit=99999`;
+            // Only filter by branch_id if it's not 0 (meaning, not a superuser/admin branch_id=0)
+            if (branchId !== 0 && branchId !== undefined && branchId !== null) {
+                 url += `&branch_id=${branchId}`;
+            }
+
+
+            console.log("Fetching ATMs from URL:", url);
+
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -182,27 +228,31 @@ const HasilAnalisaTab = ({
         }
     }, [getAccessToken, isAuthenticated, getUserProfile, toast]);
 
+    // Fetch ATMs only if not in edit mode
     useEffect(() => {
-        if (isAuthenticated) {
+        if (isAuthenticated && !isEditMode) { // Only fetch if not in edit mode, as selected ATM is pre-filled
             fetchATMs();
         }
-    }, [isAuthenticated, fetchATMs]);
+    }, [isAuthenticated, fetchATMs, isEditMode]);
 
+    // Effect to filter ATMs when searchTerm or atmList changes (for Modal)
     useEffect(() => {
-        if (searchTerm.length > 0) {
-            const lowerCaseSearchTerm = searchTerm.toLowerCase();
-            const filtered = atmList.filter(atm =>
-                atm.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-                atm.code.toLowerCase().includes(lowerCaseSearchTerm) ||
-                (atm.branch_id && atm.branch_id.name.toLowerCase().includes(lowerCaseSearchTerm)) ||
-                (atm.branch_id && atm.branch_id.parent_id && atm.branch_id.parent_id.name.toLowerCase().includes(lowerCaseSearchTerm)) ||
-                atm.address.toLowerCase().includes(lowerCaseSearchTerm)
-            );
-            setFilteredAtmList(filtered.slice(0, 100));
-        } else {
-            setFilteredAtmList(atmList.slice(0, 100));
+        if (!isEditMode) {
+            if (searchTerm.length > 0) {
+                const lowerCaseSearchTerm = searchTerm.toLowerCase();
+                const filtered = atmList.filter(atm =>
+                    atm.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                    atm.code.toLowerCase().includes(lowerCaseSearchTerm) ||
+                    (atm.branch_id && atm.branch_id.name.toLowerCase().includes(lowerCaseSearchTerm)) ||
+                    (atm.branch_id && atm.branch_id.parent_id && atm.branch_id.parent_id.name.toLowerCase().includes(lowerCaseSearchTerm)) ||
+                    atm.address.toLowerCase().includes(lowerCaseSearchTerm)
+                );
+                setFilteredAtmList(filtered.slice(0, 100));
+            } else {
+                setFilteredAtmList(atmList.slice(0, 100));
+            }
         }
-    }, [searchTerm, atmList]);
+    }, [searchTerm, atmList, isEditMode]);
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
@@ -216,14 +266,15 @@ const HasilAnalisaTab = ({
     };
 
     const handleOpenSearchModal = () => {
-        if (atmList.length === 0 && !isAtmLoading) {
-            fetchATMs();
+        if (!isEditMode) { // Only allow opening modal if not in edit mode
+            if (atmList.length === 0 && !isAtmLoading) {
+                fetchATMs();
+            }
+            setSearchTerm('');
+            setFilteredAtmList(atmList.slice(0, 100));
+            onOpen();
         }
-        setSearchTerm(selectedAtmDetails ? `${selectedAtmDetails.code} - ${selectedAtmDetails.name}` : '');
-        setFilteredAtmList(atmList.slice(0, 100));
-        onOpen();
     };
-
 
     const handleSave = async () => {
         if (!relocationId) {
@@ -305,6 +356,138 @@ const HasilAnalisaTab = ({
         }
     };
 
+    const handleAccept = async () => {
+        if (!relocationId || !location.state.atmId) {
+            toast({
+                title: "Error",
+                description: "Relocation ID atau ATM ID tidak ditemukan. Harap pastikan analisis telah dijalankan dan ATM target terpilih.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom-right"
+            });
+            return;
+        }
+
+        setIsAccepting(true);
+        try {
+            const token = getAccessToken();
+            if (!token) {
+                throw new Error("Token otentikasi tidak tersedia.");
+            }
+
+            const payload = {
+                relocation_id: relocationId,
+                atm_id: parseInt(selectedAtmId),
+            };
+            console.log("Sending accept (save-relocation) payload:", payload);
+
+            const response = await fetch(`${BASE_URL}/approve-relocation/${relocationId}`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'ngrok-skip-browser-warning': 'true',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log("Relocation accepted (saved) successfully:", result);
+            toast({
+                title: "Relokasi Diterima",
+                description: "Relokasi berhasil diterima dan disimpan.",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom-right"
+            });
+        } catch (err) {
+            console.error("Error accepting relocation:", err);
+            toast({
+                title: "Gagal Menerima Relokasi",
+                description: err.message || "Terjadi kesalahan saat menerima relokasi.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom-right"
+            });
+        } finally {
+            setIsAccepting(false);
+        }
+    };
+
+    const handleReject = async () => {
+        if (!relocationId ) { // Ensure selectedAtmId is available
+            toast({
+                title: "Error",
+                description: "Relocation ID atau ATM ID tidak ditemukan. Harap pastikan analisis telah dijalankan dan ATM target terpilih.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom-right"
+            });
+            return;
+        }
+
+        setIsRejecting(true);
+        try {
+            const token = getAccessToken();
+            if (!token) {
+                throw new Error("Token otentikasi tidak tersedia.");
+            }
+
+            const payload = {
+                relocation_id: relocationId,
+                atm_id: parseInt(selectedAtmId), // Include atm_id as per your request
+            };
+            console.log("Sending reject payload:", payload);
+
+            const response = await fetch(`${BASE_URL}/reject-relocation/${relocationId}`, {
+                method: "POST", // Assuming POST based on your provided req body, even though path implies PUT
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'ngrok-skip-browser-warning': 'true',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log("Relocation rejected successfully:", result);
+            toast({
+                title: "Relokasi Ditolak",
+                description: "Relokasi berhasil ditolak.",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom-right"
+            });
+        } catch (err) {
+            console.error("Error rejecting relocation:", err);
+            toast({
+                title: "Gagal Menolak Relokasi",
+                description: err.message || "Terjadi kesalahan saat menolak relokasi.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom-right"
+            });
+        } finally {
+            setIsRejecting(false);
+        }
+    };
+
     return (
         <TabPanel p={6}>
             <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={6}>
@@ -318,12 +501,7 @@ const HasilAnalisaTab = ({
                         <Card boxShadow="sm" borderRadius="20px" bg="white" border="1px solid gray">
                             <CardBody p={4} minWidth={600}>
                                 <Text fontSize="md" fontWeight="medium" noOfLines={2}>
-                                    {/* PRIORITAS: initialInputAddress (dari request body)
-                                        FALLBACK 1: analysisResult.address (dari respons API edit/analisis)
-                                        FALLBACK 2: nearest_branches[0].address (jika tidak ada yang lain)
-                                        FALLBACK 3: Default message
-                                    */}
-                                    {initialInputAddress || analysisResult?.address || analysisResult?.nearest_branches?.[0]?.address || 'Alamat Lokasi Tidak Tersedia'}
+                                    {analysisResult?.address || 'Alamat Lokasi Tidak Tersedia'}
                                 </Text>
                             </CardBody>
                         </Card>
@@ -392,21 +570,21 @@ const HasilAnalisaTab = ({
                         </Card>
                     </VStack>
 
-                    {/* Target Relokasi Section - Trigger button for Modal */}
+                    {/* Target Relokasi Section - Conditional input and display */}
                     <VStack align="stretch" spacing={4} mt={8}>
                         <Text fontSize="lg" fontWeight="bold">
                             Target relokasi
                         </Text>
                         <FormControl>
-                            <FormLabel htmlFor="atm-search-button">Pilih ATM Target:</FormLabel>
+                            <FormLabel htmlFor="atm-search-input">Pilih ATM Target:</FormLabel>
                             <InputGroup>
                                 <Input
-                                    id="atm-search-button"
-                                    placeholder="Klik untuk mencari ATM..."
-                                    value={selectedAtmDetails ? `${selectedAtmDetails.code} - ${selectedAtmDetails.name} (${selectedAtmDetails.address})` : ''}
-                                    isReadOnly
+                                    id="atm-search-input"
+                                    placeholder={isEditMode ? "ATM target sudah terpilih dari data edit." : "Klik untuk mencari ATM..."}
+                                    value={searchTerm}
+                                    isReadOnly={isEditMode}
                                     onClick={handleOpenSearchModal}
-                                    cursor="pointer"
+                                    cursor={isEditMode ? "not-allowed" : "pointer"}
                                     size="lg"
                                     bg="white"
                                     borderRadius="md"
@@ -414,25 +592,56 @@ const HasilAnalisaTab = ({
                                     pr="4.5rem"
                                 />
                                 <InputRightElement width="4.5rem">
-                                    <Button h="1.75rem" size="sm" onClick={handleOpenSearchModal} isLoading={isAtmLoading}>
+                                    <Button
+                                        h="1.75rem"
+                                        size="sm"
+                                        onClick={handleOpenSearchModal}
+                                        isLoading={isAtmLoading}
+                                        isDisabled={isEditMode}
+                                    >
                                         <Icon as={FaSearch} />
                                     </Button>
                                 </InputRightElement>
                             </InputGroup>
 
                             {/* Display selected ATM details below the input */}
-                            {selectedAtmDetails && (
-                                <Box mt={4} p={3} borderWidth="1px" borderRadius="md" bg="blue.50" borderColor="blue.200">
-                                    <Text fontWeight="bold">ATM Terpilih:</Text>
-                                    <Text>Kode: {selectedAtmDetails.code}</Text>
-                                    <Text>Nama: {selectedAtmDetails.name}</Text>
-                                    <Text>Alamat: {selectedAtmDetails.address}</Text>
-                                    <Text>Cabang: {selectedAtmDetails.branch_id?.name || 'N/A'}</Text>
-                                    <Text>Kanwil: {selectedAtmDetails.branch_id?.parent_id?.name || 'N/A'}</Text>
-                                </Box>
-                            )}
+                            {(() => {
+                                console.log("Rendering selected ATM details section. current selectedAtmDetails:", location.state || selectedAtmDetails);
+                                if (location.state && location.state.atmId && !selectedAtmDetails) {
+                                    // Show details from location.state if available and selectedAtmDetails is not set
+                                    return (
+                                        <Box mt={4} p={3} borderWidth="1px" borderRadius="md" bg="blue.50" borderColor="blue.200">
+                                            <Text fontWeight="bold">ATM Terpilih:</Text>
+                                            <Text>Kode: {location.state.code || '-'}</Text>
+                                            <Text>Nama: {location.state.name || '-'}</Text>
+                                            <Text>Alamat: {location.state.address || '-'}</Text>
+                                        </Box>
+                                    );
+                                } else if (selectedAtmDetails) {
+                                    // Show details from selectedAtmDetails if available
+                                    return (
+                                        <Box mt={4} p={3} borderWidth="1px" borderRadius="md" bg="blue.50" borderColor="blue.200">
+                                            <Text fontWeight="bold">ATM Terpilih:</Text>
+                                            <Text>Kode: {selectedAtmDetails.code}</Text>
+                                            <Text>Nama: {selectedAtmDetails.name}</Text>
+                                            <Text>Alamat: {selectedAtmDetails.address}</Text>
+                                            {isEditMode && (
+                                                <>
+                                                    <Text>Latitude: {selectedAtmDetails.latitude}</Text>
+                                                    <Text>Longitude: {selectedAtmDetails.longitude}</Text>
+                                                    {selectedAtmDetails.distance && <Text>Jarak: {selectedAtmDetails.distance.toFixed(2)} meter</Text>}
+                                                </>
+                                            )}
+                                            <Text>Cabang: {selectedAtmDetails.branch_id?.name || 'N/A'}</Text>
+                                            <Text>Kanwil: {selectedAtmDetails.branch_id?.parent_id?.name || 'N/A'}</Text>
+                                        </Box>
+                                    );
+                                } else {
+                                    return null;
+                                }
+                            })()}
 
-                            {atmError && (
+                            {atmError && !isEditMode && (
                                 <Text color="red.500" fontSize="sm" mt={2}>{atmError}</Text>
                             )}
                         </FormControl>
@@ -508,76 +717,114 @@ const HasilAnalisaTab = ({
                                 boxShadow="md"
                                 _hover={{ boxShadow: "lg", transform: "translateY(-2px)" }}
                                 _active={{ boxShadow: "sm", transform: "translateY(0)" }}
-                                isDisabled={!selectedAtmId || isSaving || isAtmLoading}
+                                isDisabled={!selectedAtmId || isSaving}
                                 isLoading={isSaving}
                             >
                                 Save
                             </Button>
+
+                            {/* New Accept and Reject buttons - Visible only in edit mode AND for branch_id = 0 */}
+                            {isEditMode && canApproveReject && (
+                                <Flex mt={4} justifyContent="space-around">
+                                    <Button
+                                        colorScheme="green"
+                                        size="lg"
+                                        borderRadius="25px"
+                                        onClick={handleAccept}
+                                        isLoading={isAccepting}
+                                        isDisabled={isRejecting } 
+                                        flex="1"
+                                        mr={2}
+                                        boxShadow="md"
+                                        _hover={{ boxShadow: "lg", transform: "translateY(-2px)" }}
+                                        _active={{ boxShadow: "sm", transform: "translateY(0)" }}
+                                    >
+                                        Accept
+                                    </Button>
+                                    <Button
+                                        colorScheme="red"
+                                        size="lg"
+                                        borderRadius="25px"
+                                        onClick={handleReject}
+                                        isLoading={isRejecting}
+                                        isDisabled={isAccepting }   
+                                        flex="1"
+                                        ml={2}
+                                        boxShadow="md"
+                                        _hover={{ boxShadow: "lg", transform: "translateY(-2px)" }}
+                                        _active={{ boxShadow: "sm", transform: "translateY(0)" }}
+                                    >
+                                        Reject
+                                    </Button>
+                                </Flex>
+                            )}
                         </CardBody>
                     </Card>
                 </VStack>
             </Grid>
 
-            {/* --- ATM Search Modal --- */}
-            <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
-                <ModalOverlay />
-                <ModalContent borderRadius="md">
-                    <ModalHeader borderBottomWidth="1px">Cari ATM Target Relokasi</ModalHeader>
-                    <ModalBody>
-                        <FormControl mb={4}>
-                            <FormLabel htmlFor="modal-atm-search">Cari berdasarkan:</FormLabel>
-                            <Input
-                                id="modal-atm-search"
-                                placeholder="Kanwil, Kode ATM, Cabang, Alamat..."
-                                value={searchTerm}
-                                onChange={handleSearchChange}
-                                size="md"
-                            />
-                        </FormControl>
+            {/* --- ATM Search Modal (only for new analysis mode) --- */}
+            {!isEditMode && (
+                <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
+                    <ModalOverlay />
+                    <ModalContent borderRadius="md">
+                        <ModalHeader borderBottomWidth="1px">Cari ATM Target Relokasi</ModalHeader>
+                        <ModalBody>
+                            <FormControl mb={4}>
+                                <FormLabel htmlFor="modal-atm-search">Cari berdasarkan:</FormLabel>
+                                <Input
+                                    id="modal-atm-search"
+                                    placeholder="Kanwil, Kode ATM, Cabang, Alamat..."
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                    size="md"
+                                />
+                            </FormControl>
 
-                        {isAtmLoading && atmList.length === 0 ? (
-                            <Center py={10}>
-                                <Spinner size="lg" color="blue.500" />
-                                <Text ml={4} fontSize="lg" color="gray.600">Memuat daftar ATM...</Text>
-                            </Center>
-                        ) : atmError ? (
-                            <Center py={10}>
-                                <Text color="red.500" fontSize="md">{atmError}</Text>
-                            </Center>
-                        ) : filteredAtmList.length === 0 && searchTerm.length > 0 ? (
-                            <Center py={10}>
-                                <Text color="gray.500" fontSize="md">Tidak ditemukan ATM yang cocok dengan "{searchTerm}".</Text>
-                            </Center>
-                        ) : (
-                            <List spacing={0}>
-                                {filteredAtmList.map((atm) => (
-                                    <React.Fragment key={atm.id}>
-                                        <ListItem
-                                            p={3}
-                                            _hover={{ bg: 'blue.50', cursor: 'pointer' }}
-                                            onClick={() => handleSelectAtm(atm)}
-                                        >
-                                            <Text fontWeight="semibold">{atm.code} - {atm.name}</Text>
-                                            <Text fontSize="sm" color="gray.600" noOfLines={1}>
-                                                {atm.address}
-                                            </Text>
-                                            <Text fontSize="xs" color="gray.500">
-                                                {atm.branch_id?.name || 'N/A'} (Kanwil: {atm.branch_id?.parent_id?.name || 'N/A'})
-                                            </Text>
-                                        </ListItem>
-                                        <Divider my={0} />
-                                    </React.Fragment>
-                                ))}
-                            </List>
-                        )}
-                    </ModalBody>
-                    <ModalFooter borderTopWidth="1px">
-                        <Button colorScheme="blue" mr={3} onClick={onClose}>
-                            Tutup
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
+                            {isAtmLoading && atmList.length === 0 ? (
+                                <Center py={10}>
+                                    <Spinner size="lg" color="blue.500" />
+                                    <Text ml={4} fontSize="lg" color="gray.600">Memuat daftar ATM...</Text>
+                                </Center>
+                            ) : atmError ? (
+                                <Center py={10}>
+                                    <Text color="red.500" fontSize="md">{atmError}</Text>
+                                </Center>
+                            ) : filteredAtmList.length === 0 && searchTerm.length > 0 ? (
+                                <Center py={10}>
+                                    <Text color="gray.500" fontSize="md">Tidak ditemukan ATM yang cocok dengan "{searchTerm}".</Text>
+                                </Center>
+                            ) : (
+                                <List spacing={0}>
+                                    {filteredAtmList.map((atm) => (
+                                        <React.Fragment key={atm.id}>
+                                            <ListItem
+                                                p={3}
+                                                _hover={{ bg: 'blue.50', cursor: 'pointer' }}
+                                                onClick={() => handleSelectAtm(atm)}
+                                            >
+                                                <Text fontWeight="semibold">{atm.code} - {atm.name}</Text>
+                                                <Text fontSize="sm" color="gray.600" noOfLines={1}>
+                                                    {atm.address}
+                                                </Text>
+                                                <Text fontSize="xs" color="gray.500">
+                                                    {atm.branch_id?.name} (Kanwil: {atm.branch_id?.parent_id?.name || 'N/A'})
+                                                </Text>
+                                            </ListItem>
+                                            <Divider my={0} />
+                                        </React.Fragment>
+                                    ))}
+                                </List>
+                            )}
+                        </ModalBody>
+                        <ModalFooter borderTopWidth="1px">
+                            <Button colorScheme="blue" mr={3} onClick={onClose}>
+                                Tutup
+                            </Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+            )}
         </TabPanel>
     );
 };
