@@ -184,7 +184,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
             const branchId = userProfileData.branch_id?.id;
             console.log("User's branch_id:", branchId);
 
-            let url = `${BASE_URL}/atms?limit=99999`;
+            let url = `${BASE_URL}/atms?limit=9999999&page=1`;
             // Only filter by branch_id if it's not 0 (meaning, not a superuser/admin branch_id=0)
             if (branchId !== 0 && branchId !== undefined && branchId !== null) {
                  url += `&branch_id=${branchId}`;
@@ -610,7 +610,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
                                 if (location.state && location.state.atmId && !selectedAtmDetails) {
                                     // Show details from location.state if available and selectedAtmDetails is not set
                                     return (
-                                        <Box mt={4} p={3} borderWidth="1px" borderRadius="md" bg="blue.50" borderColor="blue.200">
+                                        <Box mt={4} p={3} borderWidth="1px" borderRadius="25" bg="blue.50" borderColor="blue.200">
                                             <Text fontWeight="bold">ATM Terpilih:</Text>
                                             <Text>Kode: {location.state.code || '-'}</Text>
                                             <Text>Nama: {location.state.name || '-'}</Text>

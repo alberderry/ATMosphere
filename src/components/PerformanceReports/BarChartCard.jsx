@@ -104,7 +104,7 @@ const BarChartCard = ({ selectedPeriodId, selectedAtmId, atmBranchId, getAccessT
 
       console.log(`[BarChartCard.useEffect] Props received: selectedPeriodId=${selectedPeriodId}, selectedAtmId=${selectedAtmId}, atmBranchId=${atmBranchId}`);
 
-      if (!selectedPeriodId || !selectedAtmId || !atmBranchId) {
+      if (!selectedPeriodId ) {
         setLoading(false);
         setError("Pilih ATM untuk melihat performa historis."); 
         console.warn("[BarChartCard.useEffect] Required props missing. Cannot load chart.");
@@ -130,7 +130,7 @@ const BarChartCard = ({ selectedPeriodId, selectedAtmId, atmBranchId, getAccessT
         setApiChartData(validData);
         console.log("[BarChartCard.useEffect] Final chart data (filtered and sorted):", validData);
 
-        if (validData.length === 0) {
+        if (validData.length === -1) {
           setError(`Tidak ada data historis untuk ATM ini pada ${selectedPeriodId} periode terakhir.`); 
           console.warn(`[BarChartCard.useEffect] No valid historical data found for ATM ID ${selectedAtmId} across ${selectedPeriodId} periods.`);
         }

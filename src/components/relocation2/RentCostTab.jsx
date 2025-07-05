@@ -27,21 +27,10 @@ const RentCostTab = ({
     handleAnalyze,
     isLoading,
     latitude,
-    longitude
+    longitude,
+    // isEditMode // Tambahkan prop baru ini
 }) => {
-    // Fungsi helper untuk memformat angka menjadi format mata uang
-    // const formatCurrency = (value) => {
-    //     if (!value) return '';
-    //     const num = parseFloat(value);
-    //     if (isNaN(num)) return value; // Return as is if not a number
-    //     return num.toLocaleString("id-ID");
-    // };
-
-    // // Fungsi untuk menghilangkan format mata uang saat mengedit
-    // const parseNumberInput = (value) => {
-    //     return value.replace(/[^0-9]/g, ''); // Hapus semua karakter non-angka
-    // };
-
+    const isEditMode1 = location.pathname.includes('/edit/');
     return (
         <TabPanel p={6}>
             <VStack spacing={6} align="stretch">
@@ -56,7 +45,7 @@ const RentCostTab = ({
                                 Machine Rental Cost (Rp)
                             </FormLabel>
                             <Input
-                                type="number" // Menggunakan type number untuk input numerik
+                                type="number"
                                 placeholder="Masukkan biaya sewa mesin"
                                 value={machineCostInput}
                                 onChange={(e) => setMachineCostInput(e.target.value)}
@@ -72,7 +61,7 @@ const RentCostTab = ({
                                 Facility Rental Cost (Rp)
                             </FormLabel>
                             <Input
-                                type="number" // Menggunakan type number
+                                type="number"
                                 placeholder="Masukkan biaya sewa tempat"
                                 value={rentCostInput}
                                 onChange={(e) => setRentCostInput(e.target.value)}
@@ -88,7 +77,7 @@ const RentCostTab = ({
                                 Electricity Cost (Rp)
                             </FormLabel>
                             <Input
-                                type="number" // Menggunakan type number
+                                type="number"
                                 placeholder="Masukkan biaya listrik"
                                 value={electricityCostInput}
                                 onChange={(e) => setElectricityCostInput(e.target.value)}
@@ -104,7 +93,7 @@ const RentCostTab = ({
                                 Cash Replenishment Cost (Rp)
                             </FormLabel>
                             <Input
-                                type="number" // Menggunakan type number
+                                type="number"
                                 placeholder="Masukkan biaya isi ulang"
                                 value={isiUlangCostInput}
                                 onChange={(e) => setIsUlangCostInput(e.target.value)}
@@ -121,8 +110,9 @@ const RentCostTab = ({
                     <Button
                         colorScheme="blue"
                         onClick={handleAnalyze}
-                        isLoading={isLoading} // Menggunakan isLoading langsung
+                        isLoading={isLoading}
                         isDisabled={
+                            isEditMode1 || // Tombol dinonaktifkan jika dalam mode edit
                             !latitude || !longitude || // Lokasi harus valid
                             isNaN(parseFloat(rentCostInput)) || parseFloat(rentCostInput) < 0 ||
                             isNaN(parseFloat(machineCostInput)) || parseFloat(machineCostInput) < 0 ||
