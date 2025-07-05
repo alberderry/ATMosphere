@@ -28,6 +28,22 @@ import {
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 
+// Function to load Google Maps script dynamically
+const loadGoogleMapsScript = (apiKey) => {
+  if (window.google && window.google.maps) {
+    return Promise.resolve(); // Already loaded
+  }
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load Google Maps script'));
+    document.head.appendChild(script);
+  });
+};
+
 const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) => {
   const [formData, setFormData] = useState({
     branch_id: null,
@@ -42,9 +58,8 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
     electronic_cost: '',
     rent_cost: '',
     machine_cost: '',
-    // **NAMA FIELD DIUBAH**: replenishment_cost
     replenishment_cost: '',
-    // cost_period: 'monthly',
+    cost_period: 'monthly', // Default value
   });
   const [loading, setLoading] = useState(false);
   const [suggestionLoading, setSuggestionLoading] = useState(false);
@@ -62,8 +77,15 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
 
   const [enableCostFields, setEnableCostFields] = useState(false);
 
+  // Map state
+  const mapRef = useRef(null);
+  const googleMap = useRef(null);
+  const marker = useRef(null);
+  const mapLoaded = useRef(false); // To track if map script is loaded
+
   const debounceTimeoutRef = useRef(null);
   const branchSearchRef = useRef(null);
+  const latLngInputDebounceRef = useRef(null); // Debounce for manual lat/lng input
 
   const canEditBranch = userBranchId === 0;
 
@@ -196,7 +218,7 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
         electronic_cost: '',
         rent_cost: '',
         machine_cost: '',
-        replenishment_cost: '', // Reset replenishment cost
+        replenishment_cost: '',
         cost_period: 'monthly',
       });
       setEnableCostFields(false);
@@ -209,6 +231,12 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
       }
     } else {
       setAllBranches([]);
+      // Clean up map resources when modal closes
+      if (googleMap.current) {
+        googleMap.current = null;
+        marker.current = null;
+        mapLoaded.current = false;
+      }
     }
   }, [isOpen, userBranchId, baseUrl, getAccessToken, toast, canEditBranch, fetchAllBranches]);
 
@@ -221,7 +249,23 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
   const handleNumberChange = useCallback((name, valueString) => {
     const value = parseFloat(valueString);
     setFormData((prev) => ({ ...prev, [name]: isNaN(value) ? '' : value }));
-  }, []);
+
+    // Debounce to update map after user finishes typing
+    if (latLngInputDebounceRef.current) {
+      clearTimeout(latLngInputDebounceRef.current);
+    }
+    latLngInputDebounceRef.current = setTimeout(() => {
+      const lat = name === 'latitude' ? value : parseFloat(formData.latitude);
+      const lng = name === 'longitude' ? value : parseFloat(formData.longitude);
+
+      if (googleMap.current && marker.current && !isNaN(lat) && !isNaN(lng)) {
+        const newPos = new window.google.maps.LatLng(lat, lng);
+        marker.current.setPosition(newPos);
+        googleMap.current.setCenter(newPos);
+      }
+    }, 500); // 500ms debounce
+  }, [formData.latitude, formData.longitude]); // Depend on formData lat/lng for correct combined value
+
 
   const filterBranchSuggestions = useCallback((query) => {
     if (query.length < 3) {
@@ -275,6 +319,79 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
     setBranchSearchInput(branch.name);
     setBranchSuggestions([]);
   }, [canEditBranch]);
+
+  // --- Google Maps Logic ---
+  // Ganti dengan API Key Google Maps Anda
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_Maps_API_KEY';
+
+  useEffect(() => {
+    if (isOpen && mapRef.current && !mapLoaded.current) {
+      loadGoogleMapsScript(googleMapsApiKey)
+        .then(() => {
+          if (mapLoaded.current) return; // Prevent double initialization
+
+          const defaultLocation = { lat: -6.2088, lng: 106.8456 }; // Jakarta coordinates
+          const initialLat = parseFloat(formData.latitude);
+          const initialLng = parseFloat(formData.longitude);
+
+          const center = (!isNaN(initialLat) && !isNaN(initialLng))
+            ? { lat: initialLat, lng: initialLng }
+            : defaultLocation;
+
+          googleMap.current = new window.google.maps.Map(mapRef.current, {
+            center: center,
+            zoom: 12,
+            mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+          });
+
+          marker.current = new window.google.maps.Marker({
+            position: center,
+            map: googleMap.current,
+            draggable: true,
+          });
+
+          marker.current.addListener('dragend', () => {
+            const newPos = marker.current.getPosition();
+            setFormData(prev => ({
+              ...prev,
+              latitude: newPos.lat().toFixed(6), // Limit decimal places
+              longitude: newPos.lng().toFixed(6), // Limit decimal places
+            }));
+          });
+          mapLoaded.current = true; // Mark map as loaded
+        })
+        .catch(err => {
+          console.error(err);
+          toast({
+            title: "Error Loading Map",
+            description: "Gagal memuat Google Maps. Cek koneksi internet Anda atau kunci API.",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        });
+    }
+  }, [isOpen, googleMapsApiKey, formData.latitude, formData.longitude, toast]);
+
+  // Effect to update map marker when formData.latitude or longitude changes (e.g., manual input)
+  useEffect(() => {
+    // Only update if map is loaded and the change didn't originate from map drag
+    if (mapLoaded.current && googleMap.current && marker.current) {
+      const lat = parseFloat(formData.latitude);
+      const lng = parseFloat(formData.longitude);
+
+      if (!isNaN(lat) && !isNaN(lng)) {
+        const currentMarkerPos = marker.current.getPosition();
+        // Only update if position is different to avoid infinite loop with dragend
+        if (currentMarkerPos.lat().toFixed(6) !== lat.toFixed(6) || currentMarkerPos.lng().toFixed(6) !== lng.toFixed(6)) {
+          const newPos = new window.google.maps.LatLng(lat, lng);
+          marker.current.setPosition(newPos);
+          googleMap.current.setCenter(newPos);
+        }
+      }
+    }
+  }, [formData.latitude, formData.longitude]);
+
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
@@ -333,8 +450,8 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
         electronic_cost: parseFloat(formData.electronic_cost),
         rent_cost: parseFloat(formData.rent_cost),
         machine_cost: parseFloat(formData.machine_cost),
-        replenishment_cost: parseFloat(formData.replenishment_cost), // Nama field disesuaikan
-        
+        replenishment_cost: parseFloat(formData.replenishment_cost),
+        cost_period: formData.cost_period,
       };
     }
 
@@ -346,21 +463,22 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
     if (enableCostFields) {
       allRequiredFields = [
         ...allRequiredFields,
-        'electricity_cost',
-        'electronic_cost',
-        'rent_cost',
-        'machine_cost',
-        'replenishment_cost', // Nama field disesuaikan
+        // 'electricity_cost',
+        // 'electronic_cost',
+        // 'rent_cost',
+        // 'machine_cost',
+        // 'replenishment_cost',
+        // 'cost_period',
       ];
     }
 
     for (const field of allRequiredFields) {
-      if ((!requestBody[field] && requestBody[field] !== 0) || (field === 'branch_id' && requestBody[field] === null)) {
+      if ((!requestBody[field] && requestBody[field] !== 0 && field !== 'cost_period') || (field === 'branch_id' && requestBody[field] === null)) {
         setError(`Field '${field}' is required.`);
         setLoading(false);
         toast({
           title: "Input Tidak Lengkap",
-          description: `Bidang '${field}' diperlukan.`,
+          description: `Field '${field}' diperlukan.`,
           status: "warning",
           duration: 3000,
           isClosable: true,
@@ -383,7 +501,7 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
     }
 
     if (enableCostFields) {
-      const costFields = ['electricity_cost', 'electronic_cost', 'rent_cost', 'machine_cost', 'replenishment_cost']; // Nama field disesuaikan
+      const costFields = [];
       for (const costField of costFields) {
         if (isNaN(requestBody[costField])) {
           setError(`Biaya '${costField}' harus berupa angka yang valid.`);
@@ -427,7 +545,7 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
         } else {
           toast({
             title: "ATM Berhasil Dibuat",
-            description: "ATM baru berhasil ditambahkan (detail tidak tersedia dalam respons).",
+            description: "ATM baru berhasil ditambahkan.",
             status: "success",
             duration: 4000,
             isClosable: true,
@@ -463,11 +581,9 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
   }, [formData, selectedBranchId, canEditBranch, initialBranchLoadError, enableCostFields, baseUrl, getAccessToken, onSuccess, toast]);
 
   const formFields = useMemo(() => [
-    { name: 'code', label: 'Kode ATM', type: 'text', isRequired: true, value: formData.code, handler: handleChange },
-    { name: 'name', label: 'Nama ATM', type: 'text', isRequired: true, value: formData.name, handler: handleChange },
-    { name: 'address', label: 'Alamat', type: 'text', isRequired: true, value: formData.address, handler: handleChange },
-    { name: 'latitude', label: 'Latitude', type: 'number', isRequired: true, value: formData.latitude, handler: handleNumberChange },
-    { name: 'longitude', label: 'Longitude', type: 'number', isRequired: true, value: formData.longitude, handler: handleNumberChange },
+    { name: 'code', label: 'Kode ATM', type: 'text', value: formData.code, handler: handleChange },
+    { name: 'name', label: 'Nama ATM', type: 'text', value: formData.name, handler: handleChange },
+    { name: 'address', label: 'Alamat', type: 'text', value: formData.address, handler: handleChange },
     {
       name: 'type',
       label: 'Tipe Mesin',
@@ -483,11 +599,11 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
     },
     { name: 'brand', label: 'Brand', type: 'text', isRequired: true, value: formData.brand, handler: handleChange },
     // Biaya-biaya ini sekarang dikontrol oleh `enableCostFields`
-    { name: 'electricity_cost', label: 'Electricity Cost', type: 'number', isRequired: enableCostFields, value: formData.electricity_cost, handler: handleNumberChange, disabled: !enableCostFields },
-    { name: 'electronic_cost', label: 'Electronic Cost', type: 'number', isRequired: enableCostFields, value: formData.electronic_cost, handler: handleNumberChange, disabled: !enableCostFields },
-    { name: 'rent_cost', label: 'Facility Rental Cost', type: 'number', isRequired: enableCostFields, value: formData.rent_cost, handler: handleNumberChange, disabled: !enableCostFields },
-    { name: 'machine_cost', label: 'Machine Rental Cost', type: 'number', isRequired: enableCostFields, value: formData.machine_cost, handler: handleNumberChange, disabled: !enableCostFields },
-    { name: 'replenishment_cost', label: 'Cash Replenishment Cost', type: 'number', isRequired: enableCostFields, value: formData.replenishment_cost, handler: handleNumberChange, disabled: !enableCostFields },
+    { name: 'electricity_cost', label: 'Electricity Cost', type: 'number',  value: formData.electricity_cost, handler: handleNumberChange, disabled: !enableCostFields },
+    { name: 'electronic_cost', label: 'Electronic Cost', type: 'number',  value: formData.electronic_cost, handler: handleNumberChange, disabled: !enableCostFields },
+    { name: 'rent_cost', label: 'Facility Rental Cost', type: 'number',  value: formData.rent_cost, handler: handleNumberChange, disabled: !enableCostFields },
+    { name: 'machine_cost', label: 'Machine Rental Cost', type: 'number',  value: formData.machine_cost, handler: handleNumberChange, disabled: !enableCostFields },
+    { name: 'replenishment_cost', label: 'Cash Replenishment Cost', type: 'number', value: formData.replenishment_cost, handler: handleNumberChange, disabled: !enableCostFields },
   ], [formData, handleChange, handleNumberChange, enableCostFields]);
 
   return (
@@ -610,6 +726,45 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
 
             ---
 
+            {/* Latitude and Longitude Input (always visible) */}
+            <FormControl id="location_input">
+              <FormLabel>Lokasi (Latitude & Longitude)</FormLabel>
+              <HStack spacing={4} width="100%">
+                <FormControl id="latitude" isRequired={true}>
+                  <FormLabel fontSize="sm">Latitude</FormLabel>
+                  <NumberInput
+                    value={formData.latitude}
+                    onChange={(val) => handleNumberChange('latitude', val)}
+                    precision={6} // Display up to 6 decimal places
+                    step={0.000001} // Small step for precise changes
+                  >
+                    <NumberInputField name="latitude" placeholder="e.g., -6.2088" />
+                  </NumberInput>
+                </FormControl>
+                <FormControl id="longitude" isRequired={true}>
+                  <FormLabel fontSize="sm">Longitude</FormLabel>
+                  <NumberInput
+                    value={formData.longitude}
+                    onChange={(val) => handleNumberChange('longitude', val)}
+                    precision={6} // Display up to 6 decimal places
+                    step={0.000001} // Small step for precise changes
+                  >
+                    <NumberInputField name="longitude" placeholder="e.g., 106.8456" />
+                  </NumberInput>
+                </FormControl>
+              </HStack>
+            </FormControl>
+
+            {/* Google Maps View (always visible below inputs) */}
+            <Box width="100%" height="400px" borderWidth="1px" borderRadius="md" overflow="hidden">
+              <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+              <Text fontSize="sm" color="gray.600" mt={2} textAlign="center">
+                Seret pin di peta untuk menyesuaikan Latitude dan Longitude.
+              </Text>
+            </Box>
+
+            ---
+
             <FormControl display="flex" alignItems="center">
               <Checkbox
                 id="enable_cost_fields"
@@ -625,7 +780,7 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
                 <FormLabel>Periode Biaya</FormLabel>
                 <Select
                   name="cost_period"
-                 
+                  value={formData.cost_period}
                   onChange={handleChange}
                 >
                   <option value="monthly">Per Bulan</option>
