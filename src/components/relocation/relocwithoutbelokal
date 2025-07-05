@@ -248,8 +248,7 @@ const RelocationComponent = () => {
     }
 
     if (!autocompleteService.current) {
-      console.warn("Google Maps AutocompleteService belum dimuat. Tidak dapat mencari lokasi.");
-      toast({
+            toast({
         title: "Peringatan",
         description: "Layanan pencarian lokasi belum siap. Coba lagi sebentar.",
         status: "info",
@@ -298,7 +297,7 @@ const RelocationComponent = () => {
     });
 
     try {
-      console.log(`Fetching place details for placeId: ${placeId} from backend proxy.`);
+      (`Fetching place details for placeId: ${placeId} from backend proxy.`);
       const response = await axios.get(
         `${BACKEND_PROXY_URL}maps/place-details/${placeId}`,
         {
@@ -364,14 +363,14 @@ const RelocationComponent = () => {
         throw new Error("Lokasi tidak valid untuk analisis.");
       }
 
-      console.log(`Sending analyze-relocation request for lat: ${location.lat}, lng: ${location.lng}`);
+      (`Sending analyze-relocation request for lat: ${location.lat}, lng: ${location.lng}`);
       const response = await axios.post(
         `${BASE_API_URL}/analyze-relocation`,
         { latitude: location.lat, longitude: location.lng },
         { headers: commonHeaders }
       );
 
-      console.log("Analyze Relocation API Response:", response.data);
+      ("Analyze Relocation API Response:", response.data);
 
       if (response.data && response.data.data) {
         const { nearest_branches, nearest_atms, public_places } = response.data.data;

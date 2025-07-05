@@ -89,13 +89,13 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
 
   const canEditBranch = userBranchId === 0;
 
-  console.log("Modal Open:", isOpen);
-  console.log("Prop userBranchId (dari props):", userBranchId);
-  console.log("canEditBranch (apakah user bisa cari cabang lain?):", canEditBranch);
-  console.log("Current branchSearchInput (teks di input pencarian):", branchSearchInput);
-  console.log("Jumlah branchSuggestions yang ada (hasil filter):", branchSuggestions.length);
-  console.log("Jumlah allBranches yang ada (semua dari API):", allBranches.length);
-  console.log("Enable Cost Fields:", enableCostFields);
+  ("Modal Open:", isOpen);
+  ("Prop userBranchId (dari props):", userBranchId);
+  ("canEditBranch (apakah user bisa cari cabang lain?):", canEditBranch);
+  ("Current branchSearchInput (teks di input pencarian):", branchSearchInput);
+  ("Jumlah branchSuggestions yang ada (hasil filter):", branchSuggestions.length);
+  ("Jumlah allBranches yang ada (semua dari API):", allBranches.length);
+  ("Enable Cost Fields:", enableCostFields);
 
 
   useEffect(() => {
@@ -115,13 +115,12 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
           "ngrok-skip-browser-warning": "true",
         },
       });
-      console.log("Respons API untuk SEMUA cabang:", response.data);
+      ("Respons API untuk SEMUA cabang:", response.data);
 
       if (response.data && response.data.data && Array.isArray(response.data.data.branches)) {
         setAllBranches(response.data.data.branches);
       } else {
-        console.warn("Respons API untuk semua cabang tidak mengandung data array 'branches' yang diharapkan. Respons:", response.data);
-        setAllBranches([]);
+                setAllBranches([]);
         toast({
           title: "Error",
           description: "Gagal memuat daftar cabang lengkap. Format data dari server tidak sesuai.",
@@ -150,7 +149,7 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
       setInitialBranchLoadError(false);
       if (!canEditBranch) {
         setSuggestionLoading(true);
-        console.log("Memuat cabang tetap untuk ID:", userBranchId);
+        ("Memuat cabang tetap untuk ID:", userBranchId);
         try {
           const authToken = getAccessToken();
           const response = await axios.get(`${baseUrl}/branches/${userBranchId}`, {
@@ -164,8 +163,7 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
             setSelectedBranchId(response.data.data.id);
             setBranchSearchInput(response.data.data.name);
           } else {
-            console.warn("Respons API untuk cabang awal tidak mengandung data yang diharapkan. Respons:", response.data);
-            toast({
+                        toast({
               title: "Peringatan",
               description: `Cabang default (ID: ${userBranchId}) tidak ditemukan atau tidak valid.`,
               status: "warning",
@@ -196,7 +194,7 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
           setSuggestionLoading(false);
         }
       } else {
-        console.log("User adalah admin (userBranchId adalah 0). Resetting state untuk pencarian cabang.");
+        ("User adalah admin (userBranchId adalah 0). Resetting state untuk pencarian cabang.");
         setSelectedBranchName('');
         setSelectedBranchId(null);
         setBranchSearchInput('');
@@ -270,7 +268,7 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
   const filterBranchSuggestions = useCallback((query) => {
     if (query.length < 3) {
       setBranchSuggestions([]);
-      console.log("Query terlalu pendek (< 3 karakter) untuk saran:", query);
+      ("Query terlalu pendek (< 3 karakter) untuk saran:", query);
       return;
     }
 
@@ -278,12 +276,12 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
       branch.name.toLowerCase().includes(query.toLowerCase())
     );
     setBranchSuggestions(filtered);
-    console.log("Cabang difilter dari allBranches:", filtered.length, "hasil.");
+    ("Cabang difilter dari allBranches:", filtered.length, "hasil.");
   }, [allBranches]);
 
 
   const handleBranchSearchChange = useCallback((e) => {
-    console.log("handleBranchSearchChange dipicu. canEditBranch:", canEditBranch);
+    ("handleBranchSearchChange dipicu. canEditBranch:", canEditBranch);
     if (!canEditBranch) return;
 
     const value = e.target.value;
@@ -299,19 +297,19 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
     }
 
     if (value.length >= 3) {
-      console.log("Mengatur debounce untuk filterBranchSuggestions dengan query:", value);
+      ("Mengatur debounce untuk filterBranchSuggestions dengan query:", value);
       debounceTimeoutRef.current = setTimeout(() => {
         filterBranchSuggestions(value);
       }, 300);
     } else {
-      console.log("Input terlalu pendek atau dibersihkan, menghapus saran dan ID yang dipilih.");
+      ("Input terlalu pendek atau dibersihkan, menghapus saran dan ID yang dipilih.");
       setBranchSuggestions([]);
       setSelectedBranchId(null);
     }
   }, [canEditBranch, allBranches, fetchAllBranches, filterBranchSuggestions, suggestionLoading]);
 
   const handleSelectBranch = useCallback((branch) => {
-    console.log("handleSelectBranch dipicu. Cabang yang dipilih:", branch);
+    ("handleSelectBranch dipicu. Cabang yang dipilih:", branch);
     if (!canEditBranch) return;
 
     setSelectedBranchName(branch.name);
@@ -527,7 +525,7 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
         },
       });
 
-      console.log("API POST /atms response:", response.data);
+      ("API POST /atms response:", response.data);
 
       if (response.status === 201) {
         const createdAtm = response.data?.data || response.data;
@@ -550,8 +548,7 @@ const AtmCreateModal = ({ isOpen, onClose, onSuccess, baseUrl, userBranchId }) =
             duration: 4000,
             isClosable: true,
           });
-          console.warn("Created ATM response missing name or code:", response.data);
-        }
+                  }
         onSuccess();
       } else {
         const msg = response.data?.message || `Gagal membuat ATM. Status: ${response.status}`;

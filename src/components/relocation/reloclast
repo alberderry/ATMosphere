@@ -284,7 +284,7 @@ const RelocationComponent = () => { // Nama komponen diubah menjadi RelocationCo
     setNearbyOtherBanks([]); // <--- Reset ATM lain
 
     try {
-      console.log(`Fetching place details for placeId: ${placeId} from backend: ${BACKEND_BASE_URL}/api/place-details/${placeId}`);
+      (`Fetching place details for placeId: ${placeId} from backend: ${BACKEND_BASE_URL}/api/place-details/${placeId}`);
       const response = await fetch(`${BACKEND_BASE_URL}/api/place-details/${placeId}`)
       if (!response.ok) {
         const errorData = await response.json();
@@ -293,7 +293,7 @@ const RelocationComponent = () => { // Nama komponen diubah menjadi RelocationCo
         throw new Error(errorMessage);
       }
       const data = await response.json()
-      console.log("Response data for place details from backend:", data);
+      ("Response data for place details from backend:", data);
 
       if (data.result && data.result.geometry) {
         const location = {
@@ -353,7 +353,7 @@ const RelocationComponent = () => { // Nama komponen diubah menjadi RelocationCo
       }
     }, 5000);
 
-    console.log(`Memulai pencarian KCP BJB terdekat untuk Lat: ${lat}, Lng: ${lng} melalui backend proxy.`);
+    (`Memulai pencarian KCP BJB terdekat untuk Lat: ${lat}, Lng: ${lng} melalui backend proxy.`);
 
     try {
       const response = await fetch(`https://guided-globally-oryx.ngrok-free.app/api/maps/places-search`, {
@@ -381,7 +381,7 @@ const RelocationComponent = () => { // Nama komponen diubah menjadi RelocationCo
       }
 
       const data = await response.json();
-      console.log("Respons dari backend proxy (Nearby Search BJB):", data);
+      ("Respons dari backend proxy (Nearby Search BJB):", data);
 
       if (data.results && data.results.length > 0) {
         const branchesWithDistance = data.results.map((branch) => {
@@ -457,7 +457,7 @@ const RelocationComponent = () => { // Nama komponen diubah menjadi RelocationCo
       }
 
       const data = await response.json();
-      console.log("Respons dari backend proxy (Nearby Other ATMs):", data);
+      ("Respons dari backend proxy (Nearby Other ATMs):", data);
 
       if (data.results && data.results.length > 0) {
         const atmsWithDistance = data.results

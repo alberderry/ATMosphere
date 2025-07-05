@@ -92,10 +92,10 @@ const Sidebar = () => {
         // Enhanced onClick handler to log button presses
         const handleClick = (event) => {
             if (hasSubmenu) {
-                console.log(`Dropdown menu "${children}" toggled. New state: ${!isOpen ? 'Open' : 'Closed'}`);
+                (`Dropdown menu "${children}" toggled. New state: ${!isOpen ? 'Open' : 'Closed'}`);
                 onToggle();
             } else {
-                console.log(`Menu item "${children}" clicked. Navigating to: ${to}`);
+                (`Menu item "${children}" clicked. Navigating to: ${to}`);
                 if (onClick) { // Execute passed onClick if available (e.g., for Logout)
                     onClick(event);
                 }
@@ -137,7 +137,7 @@ const Sidebar = () => {
 
         // Enhanced onClick handler for sub-menu items
         const handleSubmenuClick = () => {
-            console.log(`Sub-menu item "${children}" clicked. Navigating to: ${to}`);
+            (`Sub-menu item "${children}" clicked. Navigating to: ${to}`);
         };
 
         return (
@@ -376,7 +376,7 @@ const Sidebar = () => {
                     <MenuItem
                         icon={FiLogOut}
                         onClick={() => {
-                            console.log('Logout button clicked. Attempting to log out...');
+                            ('Logout button clicked. Attempting to log out...');
                             logout();
                             navigate('/login');
                         }}

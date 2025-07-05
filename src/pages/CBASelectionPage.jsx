@@ -59,7 +59,7 @@ const CBASelectionPage = () => {
             // Mengambil semua ATM dalam satu permintaan dengan limit yang sangat besar
             // Asumsi: Backend mendukung parameter 'limit'
             const apiUrl = `${BASE_URL}/atms?limit=99999`; // Mengatur limit yang sangat besar
-            console.log(`[CBASelectionPage] Mencari ATM dengan API: ${apiUrl}`);
+            (`[CBASelectionPage] Mencari ATM dengan API: ${apiUrl}`);
 
             const response = await fetch(apiUrl, {
                 method: 'GET',
@@ -81,10 +81,10 @@ const CBASelectionPage = () => {
                 const foundAtm = data.data.atms.find(atm => atm.code.toLowerCase() === trimmedInput.toLowerCase());
 
                 if (foundAtm) {
-                    console.log(`[CBASelectionPage] ATM ditemukan:`, foundAtm);
+                    (`[CBASelectionPage] ATM ditemukan:`, foundAtm);
                     navigate(`/analytics/cba/${foundAtm.id}`);
                 } else {
-                    console.log(`[CBASelectionPage] Kode "${trimmedInput}" tidak ditemukan setelah memuat semua ATM.`);
+                    (`[CBASelectionPage] Kode "${trimmedInput}" tidak ditemukan setelah memuat semua ATM.`);
                     toast({
                         title: "Kode Mesin ATM/CRM Tidak Ditemukan",
                         description: `Kode "${trimmedInput}" tidak ada dalam daftar ATM.`,
@@ -120,7 +120,7 @@ const CBASelectionPage = () => {
     return (
         <Box p={6} bg="blue.50" minH="100vh">
             <VStack spacing={6} align="center" justify="center" minH="calc(100vh - 120px)">
-                <Card p={8} bg="white" shadow="lg" borderRadius="lg" maxW="1000px" width="1000px">
+                <Card p={8} bg="white" shadow="lg" borderRadius="25px" maxW="1000px" width="1000px">
                     <CardBody p={0}>
                         <VStack spacing={4} align="stretch">
                             <Heading size="lg" color="gray.700" textAlign="center">
@@ -144,7 +144,7 @@ const CBASelectionPage = () => {
                                     }}
                                     size="lg"
                                     bg="white"
-                                    borderRadius="md"
+                                    borderRadius="25px"
                                     boxShadow="sm"
                                 />
                             </FormControl>
@@ -153,6 +153,7 @@ const CBASelectionPage = () => {
                                 colorScheme="blue"
                                 size="lg"
                                 onClick={handleAnalyzeCBA}
+                                borderRadius={25}
                                 width="full"
                                 isLoading={isLoading}
                                 loadingText="Mencari ATM..."

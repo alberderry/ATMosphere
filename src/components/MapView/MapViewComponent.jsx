@@ -31,16 +31,16 @@ const MapViewComponent = ({ atmLocations = [], userLocation = null, getTierColor
   useEffect(() => {
     // Debugging: Log the API key being used when the effect runs
     const currentApiKey = GOOGLE_MAPS_API_KEY; // Capture the value at this moment
-    console.log("Loading Google Maps API with key (inside useEffect):", currentApiKey);
+    ("Loading Google Maps API with key (inside useEffect):", currentApiKey);
 
     window.initMap = () => {
       setIsGoogleMapsLoaded(true);
-      console.log('Google Maps API berhasil dimuat.');
+      ('Google Maps API berhasil dimuat.');
     };
 
     if (window.google && window.google.maps) {
       setIsGoogleMapsLoaded(true);
-      console.log('Google Maps API sudah tersedia.');
+      ('Google Maps API sudah tersedia.');
       return;
     }
 
@@ -59,7 +59,7 @@ const MapViewComponent = ({ atmLocations = [], userLocation = null, getTierColor
       script.async = true;
       script.defer = true;
       document.head.appendChild(script);
-      console.log('Menambahkan script Google Maps API dengan URL:', scriptUrl); // Log the exact URL being used
+      ('Menambahkan script Google Maps API dengan URL:', scriptUrl); // Log the exact URL being used
 
       // Add an event listener to the script to check for load errors (optional but good for debugging)
       script.onerror = (e) => {
@@ -95,14 +95,14 @@ const MapViewComponent = ({ atmLocations = [], userLocation = null, getTierColor
 
       onAdd() {
         this.projectionReady = true;
-        console.log('CustomOverlay: onAdd - projection ready.');
+        ('CustomOverlay: onAdd - projection ready.');
       }
 
       draw() { /* No op */ }
 
       onRemove() {
         this.projectionReady = false;
-        console.log('CustomOverlay: onRemove.');
+        ('CustomOverlay: onRemove.');
       }
 
       getMapCanvasProjection() {
@@ -119,14 +119,14 @@ const MapViewComponent = ({ atmLocations = [], userLocation = null, getTierColor
     // and mapInstanceRef.current has not been initialized yet.
     if (!isGoogleMapsLoaded || !mapRef.current || mapInstanceRef.current) {
       // Debugging: Log why map initialization is skipped
-      if (!isGoogleMapsLoaded) console.log('Map init skipped: Google Maps not loaded yet.');
-      if (!mapRef.current) console.log('Map init skipped: mapRef.current is null or not mounted.', mapRef.current);
-      if (mapInstanceRef.current) console.log('Map init skipped: Map already initialized (mapInstanceRef.current exists).');
+      if (!isGoogleMapsLoaded) ('Map init skipped: Google Maps not loaded yet.');
+      if (!mapRef.current) ('Map init skipped: mapRef.current is null or not mounted.', mapRef.current);
+      if (mapInstanceRef.current) ('Map init skipped: Map already initialized (mapInstanceRef.current exists).');
       return;
     }
 
-    console.log('Menginisialisasi peta Google Maps...');
-    console.log('mapRef.current element:', mapRef.current); // Debugging: Check the DOM element
+    ('Menginisialisasi peta Google Maps...');
+    ('mapRef.current element:', mapRef.current); // Debugging: Check the DOM element
 
     // Ensure mapRef.current is a valid HTML element before attempting to initialize the map
     if (!(mapRef.current instanceof HTMLElement)) {
@@ -155,7 +155,7 @@ const MapViewComponent = ({ atmLocations = [], userLocation = null, getTierColor
       overlayRef.current.setMap(map);
     }
 
-    console.log('Peta Google Maps berhasil diinisialisasi.');
+    ('Peta Google Maps berhasil diinisialisasi.');
 
     // Cleanup function for this effect
     return () => {
@@ -168,7 +168,7 @@ const MapViewComponent = ({ atmLocations = [], userLocation = null, getTierColor
         mapInstanceRef.current = null;
         markersRef.current.forEach(marker => marker.setMap(null));
         markersRef.current = [];
-        console.log('Peta Google Maps telah di-cleanup.');
+        ('Peta Google Maps telah di-cleanup.');
       }
     };
   }, [isGoogleMapsLoaded, userLocation, CustomOverlay]); // Depend on CustomOverlay to re-run if it becomes available
@@ -178,8 +178,7 @@ const MapViewComponent = ({ atmLocations = [], userLocation = null, getTierColor
   const getPixelPosition = useCallback((latLng) => {
     // Ensure overlay is ready and its projection is available
     if (!overlayRef.current || !overlayRef.current.projectionReady) {
-      console.warn("Overlay projection not ready. Cannot get pixel position.");
-      return null;
+            return null;
     }
     const mapCanvasProjection = overlayRef.current.getMapCanvasProjection();
     // fromLatLngToContainerPixel provides coordinates relative to the map div
@@ -230,7 +229,7 @@ const MapViewComponent = ({ atmLocations = [], userLocation = null, getTierColor
   // --- Update Markers when 'atmLocations' change ---
   useEffect(() => {
     if (!isGoogleMapsLoaded || !mapInstanceRef.current || !getTierColor) {
-      // console.log("Skipping marker update:", { isGoogleMapsLoaded, mapInstanceRef: mapInstanceRef.current, getTierColor }); // More debugging
+      // ("Skipping marker update:", { isGoogleMapsLoaded, mapInstanceRef: mapInstanceRef.current, getTierColor }); // More debugging
       return;
     }
 

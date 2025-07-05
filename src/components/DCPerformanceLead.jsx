@@ -388,8 +388,7 @@ const DashboardComponent = ({
             const previousResponse = await axios.get(`${BASE_URL}/summary-by-period?period_id=${previousPeriodIdForComparison}&branch_id=0`, { headers: commonHeaders });
             previousApiData = previousResponse.data.data;
           } catch (prevError) {
-            console.warn(`Failed to fetch previous period data for period_id=${previousPeriodIdForComparison}:`, prevError);
-            // It's okay if previous data is not found, we will treat it as 0 for comparison
+                        // It's okay if previous data is not found, we will treat it as 0 for comparison
           }
         }
         

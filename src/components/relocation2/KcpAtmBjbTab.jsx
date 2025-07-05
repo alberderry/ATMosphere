@@ -13,10 +13,10 @@ const KcpAtmBjbTab = ({
     userLongitude // Menerima longitude dari lokasi yang dipilih pengguna
 }) => {
     // Tambahkan logging untuk memverifikasi prop
-    console.log("KcpAtmBjbTab - received analysisResult:", analysisResult);
-    console.log("KcpAtmBjbTab - received paginatedKcpAtm:", paginatedKcpAtm);
-    console.log("KcpAtmBjbTab - received userLatitude:", userLatitude); // Logging tambahan
-    console.log("KcpAtmBjbTab - received userLongitude:", userLongitude); // Logging tambahan
+    ("KcpAtmBjbTab - received analysisResult:", analysisResult);
+    ("KcpAtmBjbTab - received paginatedKcpAtm:", paginatedKcpAtm);
+    ("KcpAtmBjbTab - received userLatitude:", userLatitude); // Logging tambahan
+    ("KcpAtmBjbTab - received userLongitude:", userLongitude); // Logging tambahan
 
     // Pastikan nearest_branches adalah array sebelum memanggil getTotalPages
     const totalKcpAtmPages = getTotalPages(analysisResult?.nearest_branches || []);

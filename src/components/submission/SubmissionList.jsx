@@ -158,7 +158,7 @@ const SubmissionList = () => {
     }, [isAuthenticated, fetchRelocationData]);
 
     const handleCardClick = (relocation) => {
-        console.log("Navigating to edit mode with relocation:", relocation);
+        ("Navigating to edit mode with relocation:", relocation);
         // Pass relocation.atm.id if it exists, otherwise pass null or undefined
         navigate(`/action/cba-simulation/edit/${relocation.id}`, { state: { atmId: relocation.atm_id?.id, code: relocation.atm_id?.code, name: relocation.atm_id?.name, address: relocation.atm_id?.address, } });
     };

@@ -23,15 +23,15 @@ export const AuthProvider = ({ children }) => {
 
   // Efek untuk memeriksa token di localStorage saat komponen pertama kali dimuat
   useEffect(() => {
-    console.log("AuthContext diinisialisasi.");
+    ("AuthContext diinisialisasi.");
     const storedToken = localStorage.getItem(TOKEN_KEY);
     if (storedToken) {
       setToken(storedToken);
       setIsAuthenticated(true);
-      console.log("Token ditemukan di localStorage, pengguna terotentikasi.");
+      ("Token ditemukan di localStorage, pengguna terotentikasi.");
     } else {
       setIsAuthenticated(false);
-      console.log("Tidak ada token di localStorage, pengguna tidak terotentikasi.");
+      ("Tidak ada token di localStorage, pengguna tidak terotentikasi.");
     }
   }, []);
 
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem(TOKEN_KEY, newAccessToken); // Simpan token di localStorage
           setToken(newAccessToken);
           setIsAuthenticated(true);
-          console.log("Login berhasil! Token:", newAccessToken);
+          ("Login berhasil! Token:", newAccessToken);
           return true; // Login berhasil
         } else {
           // Jika respons OK tapi tidak ada access_token
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(TOKEN_KEY); // Hapus token dari localStorage
     setToken(null);
     setIsAuthenticated(false);
-    console.log("Logout. Token dihapus.");
+    ("Logout. Token dihapus.");
   };
 
   // Sediakan nilai context kepada children

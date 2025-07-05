@@ -44,9 +44,9 @@ const LokasiUmumTab = ({
     const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
     // Tambahkan logging untuk memverifikasi prop
-    console.log("LokasiUmumTab - received analysisResult:", analysisResult);
-    console.log("LokasiUmumTab - received userLatitude:", userLatitude);
-    console.log("LokasiUmumTab - received userLongitude:", userLongitude);
+    ("LokasiUmumTab - received analysisResult:", analysisResult);
+    ("LokasiUmumTab - received userLatitude:", userLatitude);
+    ("LokasiUmumTab - received userLongitude:", userLongitude);
 
     // Fungsi untuk mengelompokkan public_places berdasarkan kategori
     const groupedPublicPlaces = useMemo(() => {
@@ -79,7 +79,7 @@ const LokasiUmumTab = ({
                 }
             });
         }
-        console.log("LokasiUmumTab - groupedPublicPlaces:", groups);
+        ("LokasiUmumTab - groupedPublicPlaces:", groups);
         return groups;
     }, [analysisResult?.public_places]);
 

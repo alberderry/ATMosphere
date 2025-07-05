@@ -75,43 +75,43 @@ const HasilAnalisaTab = ({ analysisResult }) => {
 
     // --- EFFECT FOR INITIAL ATM SELECTION BASED ON URL OR PASSED STATE ---
     useEffect(() => {
-        console.log("--- HasilAnalisaTab useEffect for ATM selection triggered ---");
-        console.log("Current URL pathname:", location.pathname, "Is Edit Mode:", isEditMode);
-        console.log("analysisResult (inside useEffect):", analysisResult);
-        console.log("location.state:", location.state); // Log the entire state object
+        ("--- HasilAnalisaTab useEffect for ATM selection triggered ---");
+        ("Current URL pathname:", location.pathname, "Is Edit Mode:", isEditMode);
+        ("analysisResult (inside useEffect):", analysisResult);
+        ("location.state:", location.state); // Log the entire state object
 
         if (isEditMode) {
-            console.log("Edit mode detected.");
+            ("Edit mode detected.");
             let initialAtmDetails = null;
             let initialAtmId = '';
 
             // Prioritize ATM from analysisResult if available
             if (analysisResult && analysisResult.atm) {
-                console.log("Using analysisResult.atm for initial selection.");
+                ("Using analysisResult.atm for initial selection.");
                 initialAtmDetails = analysisResult.atm;
                 initialAtmId = analysisResult.atm.id;
             } else if (location.state && location.state.atmId) {
                 // Fallback to location.state.atmId if analysisResult.atm is not present
-                console.log("Using location.state.atmId for initial selection.");
+                ("Using location.state.atmId for initial selection.");
                 initialAtmId = location.state.atmId;
                 // If we only have atmId, we might need to fetch full ATM details
                 // This would require an additional fetch or ensuring `analysisResult.atm` is always populated correctly on load.
                 // For now, we'll assume `analysisResult.atm` comes correctly when detail is fetched.
                 // If not, you'd need a `fetchAtmDetailsById` function here.
             } else {
-                console.log("No initial ATM data from analysisResult or location.state.");
+                ("No initial ATM data from analysisResult or location.state.");
             }
 
             if (initialAtmDetails) {
                 setSelectedAtmDetails(initialAtmDetails);
                 setSelectedAtmId(initialAtmId);
                 setSearchTerm(`${initialAtmDetails.code} - ${initialAtmDetails.name} (${initialAtmDetails.address})`);
-                console.log("selectedAtmDetails set to:", initialAtmDetails);
-                console.log("searchTerm set to:", `${initialAtmDetails.code} - ${initialAtmDetails.name} (${initialAtmDetails.address})`);
+                ("selectedAtmDetails set to:", initialAtmDetails);
+                ("searchTerm set to:", `${initialAtmDetails.code} - ${initialAtmDetails.name} (${initialAtmDetails.address})`);
             } else if (initialAtmId) {
                  // If we have an ATM ID but no full details (e.g., from location.state.atmId),
                  // we should fetch the details here to populate the display.
-                 console.log(`ATM ID ${initialAtmId} found from state, but no full details. Consider fetching.`);
+                 (`ATM ID ${initialAtmId} found from state, but no full details. Consider fetching.`);
                  // You would need a function like this:
                  // fetchAtmDetailsById(initialAtmId).then(details => {
                  //     setSelectedAtmDetails(details);
@@ -119,10 +119,10 @@ const HasilAnalisaTab = ({ analysisResult }) => {
                  //     setSearchTerm(`${details.code} - ${details.name} (${details.address})`);
                  // }).catch(err => console.error("Failed to fetch ATM details:", err));
             } else {
-                console.log("No specific ATM pre-selection in edit mode.");
+                ("No specific ATM pre-selection in edit mode.");
             }
         } else {
-            console.log("New analysis mode. Clearing selected ATM details and search term.");
+            ("New analysis mode. Clearing selected ATM details and search term.");
             setSelectedAtmDetails(null);
             setSelectedAtmId('');
             setSearchTerm('');
@@ -182,7 +182,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
             }
 
             const branchId = userProfileData.branch_id?.id;
-            console.log("User's branch_id:", branchId);
+            ("User's branch_id:", branchId);
 
             let url = `${BASE_URL}/atms?limit=9999999&page=1`;
             // Only filter by branch_id if it's not 0 (meaning, not a superuser/admin branch_id=0)
@@ -191,7 +191,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
             }
 
 
-            console.log("Fetching ATMs from URL:", url);
+            ("Fetching ATMs from URL:", url);
 
             const response = await fetch(url, {
                 method: 'GET',
@@ -209,7 +209,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
 
             const result = await response.json();
             const fetchedAtms = result.data?.atms || [];
-            console.log("Fetched ATM list:", fetchedAtms);
+            ("Fetched ATM list:", fetchedAtms);
 
             setAtmList(fetchedAtms);
         } catch (err) {
@@ -313,7 +313,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
                 atm_id: parseInt(selectedAtmId),
                 relocation_id: relocationId,
             };
-            console.log("Sending save-relocation payload:", payload);
+            ("Sending save-relocation payload:", payload);
 
             const response = await fetch(`${BASE_URL}/save-relocation`, {
                 method: "POST",
@@ -331,7 +331,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
             }
 
             const result = await response.json();
-            console.log("Save relocation successful:", result);
+            ("Save relocation successful:", result);
             toast({
                 title: "Relokasi Disimpan",
                 description: "Data relokasi dan ATM berhasil disimpan.",
@@ -380,7 +380,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
                 relocation_id: relocationId,
                 atm_id: parseInt(selectedAtmId),
             };
-            console.log("Sending accept (save-relocation) payload:", payload);
+            ("Sending accept (save-relocation) payload:", payload);
 
             const response = await fetch(`${BASE_URL}/approve-relocation/${relocationId}`, {
                 method: "POST",
@@ -398,7 +398,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
             }
 
             const result = await response.json();
-            console.log("Relocation accepted (saved) successfully:", result);
+            ("Relocation accepted (saved) successfully:", result);
             toast({
                 title: "Relokasi Diterima",
                 description: "Relokasi berhasil diterima dan disimpan.",
@@ -446,7 +446,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
                 relocation_id: relocationId,
                 atm_id: parseInt(selectedAtmId), // Include atm_id as per your request
             };
-            console.log("Sending reject payload:", payload);
+            ("Sending reject payload:", payload);
 
             const response = await fetch(`${BASE_URL}/reject-relocation/${relocationId}`, {
                 method: "POST", // Assuming POST based on your provided req body, even though path implies PUT
@@ -464,7 +464,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
             }
 
             const result = await response.json();
-            console.log("Relocation rejected successfully:", result);
+            ("Relocation rejected successfully:", result);
             toast({
                 title: "Relokasi Ditolak",
                 description: "Relokasi berhasil ditolak.",
@@ -606,7 +606,7 @@ const HasilAnalisaTab = ({ analysisResult }) => {
 
                             {/* Display selected ATM details below the input */}
                             {(() => {
-                                console.log("Rendering selected ATM details section. current selectedAtmDetails:", location.state || selectedAtmDetails);
+                                ("Rendering selected ATM details section. current selectedAtmDetails:", location.state || selectedAtmDetails);
                                 if (location.state && location.state.atmId && !selectedAtmDetails) {
                                     // Show details from location.state if available and selectedAtmDetails is not set
                                     return (

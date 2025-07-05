@@ -183,8 +183,7 @@ const DashboardComponent = ({ selectedPeriod }) => {
             const previousResponse = await axios.get(`${BASE_URL}/summary-by-period?period_id=${previousPeriodIdForComparison}&branch_id=${branchId}`, { headers: commonHeaders });
             previousApiData = previousResponse.data.data;
           } catch (prevError) {
-            console.warn(`Failed to fetch previous period data for period_id=${previousPeriodIdForComparison}:`, prevError);
-          }
+                      }
         }
 
         const newSummaryStats = [
@@ -323,8 +322,7 @@ const DashboardComponent = ({ selectedPeriod }) => {
             );
             previousLeaderboardRawData = previousLeaderboardResponse.data.data.atm_performances;
           } catch (prevLBErr) {
-            console.warn(`Failed to fetch previous leaderboard data for period_id=${currentPeriodId - 1}:`, prevLBErr);
-          }
+                      }
         }
 
         const previousLeaderboardMap = new Map(

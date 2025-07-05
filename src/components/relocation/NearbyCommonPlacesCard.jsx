@@ -55,7 +55,7 @@ const NearbyCommonPlacesCard = ({
     return "📍"; // Default icon
   };
 
-  console.log("nearbyCommonPlaces prop:", nearbyCommonPlaces);
+  ("nearbyCommonPlaces prop:", nearbyCommonPlaces);
 
 
    return (

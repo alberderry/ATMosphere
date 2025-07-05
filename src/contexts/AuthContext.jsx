@@ -56,14 +56,13 @@ export const AuthProvider = ({ children }) => {
                     // Opsional: Validasi token dengan memanggil fetchUserProfile
                     const profileFetched = await fetchUserProfile(storedToken);
                     if (!profileFetched) {
-                        console.warn("Token dari localStorage tidak valid atau kedaluwarsa, membersihkan sesi.");
-                        logout(); 
+                                                logout(); 
                     } else {
-                        console.log("AuthContext: Data otentikasi dimuat dari localStorage dan divalidasi.");
+                        ("AuthContext: Data otentikasi dimuat dari localStorage dan divalidasi.");
                     }
                 } else {
                     setIsAuthenticated(false);
-                    console.log("AuthContext: Tidak ada token di localStorage, tidak terautentikasi.");
+                    ("AuthContext: Tidak ada token di localStorage, tidak terautentikasi.");
                 }
             } catch (err) {
                 console.error("AuthContext: Error saat memuat data otentikasi dari localStorage:", err);
@@ -110,7 +109,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem(USER_PROFILE_DATA_KEY, JSON.stringify(data.data)); 
             localStorage.setItem(USER_ID_KEY, data.data.id); 
 
-            console.log("Data profil pengguna berhasil dimuat dan disimpan:", data.data);
+            ("Data profil pengguna berhasil dimuat dan disimpan:", data.data);
             return true; // Berhasil
         } else { 
             // Kondisi GAGAL 1: Respons tidak OK (misal: 401, 403, 500) ATAU data.data tidak ada
@@ -154,12 +153,11 @@ export const AuthProvider = ({ children }) => {
                     setToken(newAccessToken);
                     setIsAuthenticated(true);
                     localStorage.setItem(TOKEN_KEY, newAccessToken);
-                    console.log("Login berhasil! Token disimpan:", newAccessToken);
+                    ("Login berhasil! Token disimpan:", newAccessToken);
 
                     const profileFetched = await fetchUserProfile(newAccessToken);
                     if (!profileFetched) {
-                        console.warn("Profil pengguna tidak dapat dimuat setelah login, mungkin ada masalah token.");
-                        logout(); 
+                                                logout(); 
                         return false; 
                     }
                     return true;
@@ -196,7 +194,7 @@ export const AuthProvider = ({ children }) => {
         setError(null);
         setIsLoading(false);
 
-        console.log("Logout. Token, User ID, dan data profil dihapus dari state dan localStorage.");
+        ("Logout. Token, User ID, dan data profil dihapus dari state dan localStorage.");
     };
 
     return (

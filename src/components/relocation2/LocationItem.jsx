@@ -5,11 +5,11 @@ import { FaBuilding } from 'react-icons/fa'; // Default icon
 // Fungsi untuk menghitung jarak Haversine antara dua titik (latitude, longitude)
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
     // Tambahkan log untuk debugging
-    console.log("calculateDistance - Inputs:", { lat1, lon1, lat2, lon2 });
+    ("calculateDistance - Inputs:", { lat1, lon1, lat2, lon2 });
 
     if (lat1 === null || lon1 === null || lat2 === null || lon2 === null || 
         isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
-        console.log("calculateDistance - Invalid input, returning null.");
+        ("calculateDistance - Invalid input, returning null.");
         return null; // Mengembalikan null jika ada koordinat yang hilang atau NaN
     }
     const R = 6371; // Radius bumi dalam kilometer
@@ -21,7 +21,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c; // Jarak dalam km
     
-    console.log("calculateDistance - Calculated distance:", distance);
+    ("calculateDistance - Calculated distance:", distance);
     return distance;
 };
 
@@ -36,8 +36,8 @@ const LocationItem = ({ location, icon: IconComponent = FaBuilding, userLatitude
 
 
     // Log props yang diterima
-    console.log("LocationItem - Props received:", { location, userLatitude, userLongitude });
-    console.log("LocationItem - Extracted location coordinates:", { locationLat, locationLon });
+    ("LocationItem - Props received:", { location, userLatitude, userLongitude });
+    ("LocationItem - Extracted location coordinates:", { locationLat, locationLon });
 
     // Hitung jarak jika koordinat pengguna dan lokasi tersedia
     let distanceToUser = null;
@@ -48,7 +48,7 @@ const LocationItem = ({ location, icon: IconComponent = FaBuilding, userLatitude
         
         distanceToUser = calculateDistance(userLatitude, userLongitude, locationLat, locationLon);
     } else {
-        console.log("LocationItem - Not enough valid coordinates to calculate distance.");
+        ("LocationItem - Not enough valid coordinates to calculate distance.");
     }
 
     // Logika untuk menampilkan jarak dalam km atau meter

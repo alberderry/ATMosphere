@@ -31,7 +31,7 @@ const DetailATMCard = ({ atmId, selectedPeriod }) => {
 
   const currentPeriodId = useMemo(() => {
     const periodFound = periods.find(p => p.name === selectedPeriod);
-    console.log("DetailATMCard: selectedPeriod =", selectedPeriod, "-> currentPeriodId =", periodFound?.id);
+    ("DetailATMCard: selectedPeriod =", selectedPeriod, "-> currentPeriodId =", periodFound?.id);
     return periodFound?.id;
   }, [selectedPeriod]);
 
@@ -39,7 +39,7 @@ const DetailATMCard = ({ atmId, selectedPeriod }) => {
     if (!atmId || !currentPeriodId) {
       setAtmDetailData(null);
       setLoading(false);
-      console.log('DetailATMCard: Skipping ATM detail fetch: atmId or currentPeriodId is missing.', { atmId, currentPeriodId });
+      ('DetailATMCard: Skipping ATM detail fetch: atmId or currentPeriodId is missing.', { atmId, currentPeriodId });
       return;
     }
 
@@ -49,7 +49,7 @@ const DetailATMCard = ({ atmId, selectedPeriod }) => {
 
     try {
       const url = `${API_BASE_URL}/atm-performance-detail?atm_id=${atmId}&period_id=${currentPeriodId}`;
-      console.log("DetailATMCard: Fetching ATM detail from:", url, "for atmId:", atmId, "periodId:", currentPeriodId);
+      ("DetailATMCard: Fetching ATM detail from:", url, "for atmId:", atmId, "periodId:", currentPeriodId);
 
       const response = await fetch(url, {
         headers: {
@@ -64,7 +64,7 @@ const DetailATMCard = ({ atmId, selectedPeriod }) => {
       }
 
       const result = await response.json();
-      console.log("DetailATMCard: ATM Detail API response for atmId", atmId, ":", result);
+      ("DetailATMCard: ATM Detail API response for atmId", atmId, ":", result);
 
       if (result.message && result.message.startsWith('success') && result.data) {
         setAtmDetailData(result.data);
@@ -81,7 +81,7 @@ const DetailATMCard = ({ atmId, selectedPeriod }) => {
   }, [atmId, currentPeriodId, getAccessToken]); // Dependency atmId dan currentPeriodId adalah kunci
 
   useEffect(() => {
-    console.log("DetailATMCard: useEffect triggered. atmId prop:", atmId, "currentPeriodId:", currentPeriodId);
+    ("DetailATMCard: useEffect triggered. atmId prop:", atmId, "currentPeriodId:", currentPeriodId);
     fetchAtmDetail();
   }, [atmId, currentPeriodId, fetchAtmDetail]);
 

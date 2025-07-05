@@ -30,7 +30,7 @@ const ATMListItemCard = ({ atm, onViewDetails, isActive }) => {
   const cardRef = useRef(null); 
 
   const handleViewDetailsClick = () => {
-    console.log("ATMListItemCard: Button clicked for ATM ID:", atm.id, "Kode ATM:", atm.kodeAtm);
+    ("ATMListItemCard: Button clicked for ATM ID:", atm.id, "Kode ATM:", atm.kodeAtm);
     if (onViewDetails) {
       onViewDetails(atm.id);
     }

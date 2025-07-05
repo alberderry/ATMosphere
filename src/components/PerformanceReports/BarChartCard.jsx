@@ -14,8 +14,7 @@ const BarChartCard = ({ selectedPeriodId, selectedAtmId, atmBranchId, getAccessT
   const [error, setError] = useState(null);
 
   const fetchChartDataForPeriod = useCallback(async (periodId, targetBranchId, targetAtmId) => {
-    console.log(`[BarChartCard.fetchChartDataForPeriod] Trying to fetch for Period ID: ${periodId}, Branch ID: ${targetBranchId}, ATM ID: ${targetAtmId}`);
-
+    
     if (!periodId || !targetBranchId || !targetAtmId) {
       console.warn(`[BarChartCard.fetchChartDataForPeriod] Skipping fetch: Missing params (Period: ${periodId}, Branch: ${targetBranchId}, ATM: ${targetAtmId}).`);
       return null;
@@ -29,8 +28,7 @@ const BarChartCard = ({ selectedPeriodId, selectedAtmId, atmBranchId, getAccessT
 
     try {
       const url = `${API_BASE_URL}atms-performance?period_id=${periodId}&branch_id=${targetBranchId}`;
-      console.log(`[BarChartCard.fetchChartDataForPeriod] Fetching URL: ${url}`);
-      const response = await fetch(url, {
+            const response = await fetch(url, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
           'Authorization': `Bearer ${authToken}`
@@ -44,17 +42,14 @@ const BarChartCard = ({ selectedPeriodId, selectedAtmId, atmBranchId, getAccessT
       }
 
       const result = await response.json();
-      console.log(`[BarChartCard.fetchChartDataForPeriod] Raw API response for Period ${periodId}, Branch ${targetBranchId}:`, result);
-      
+            
       // --- PERUBAHAN UTAMA DI SINI ---
       // Tambahkan log untuk melihat isi result.data secara spesifik
       if (!result.data) {
-          console.warn(`[BarChartCard.fetchChartDataForPeriod] API response for period ${periodId} is missing 'data' object. Result:`, result);
-          return null;
+                    return null;
       }
       if (!Array.isArray(result.data.atm_performances)) {
-          console.warn(`[BarChartCard.fetchChartDataForPeriod] 'atm_performances' is missing or not an array in API response for period ${periodId}. Result.data:`, result.data);
-          return null;
+                    return null;
       }
 
       // Pastikan 'success' flag juga diperiksa jika ada di root objek.
@@ -62,33 +57,28 @@ const BarChartCard = ({ selectedPeriodId, selectedAtmId, atmBranchId, getAccessT
       // Jika API Anda punya `result.success: true/false`, ganti `result.message === 'success get list atm performance'`
       // dengan `result.success`
       if (result.message === 'success get list atm performance' && result.data && Array.isArray(result.data.atm_performances)) {
-        console.log(`[BarChartCard.fetchChartDataForPeriod] Searching for ATM ID ${targetAtmId} within atm_performances array of length ${result.data.atm_performances.length}.`);
-        
+                
         const atmData = result.data.atm_performances.find(atm => {
             if (atm.atm_id && atm.atm_id.id === targetAtmId) {
-                console.log(`[BarChartCard.fetchChartDataForPeriod] Found matching ATM ID ${targetAtmId} in period ${periodId}. ATM data:`, atm);
-                return true;
+                                return true;
             }
             return false;
         });
 
         if (atmData) {
           const periodName = periods.find(p => p.id === periodId)?.name || `Periode ${periodId}`;
-          console.log(`[BarChartCard.fetchChartDataForPeriod] Data to return for ${periodName}: Fee=${atmData.fee}, Volume=${atmData.volume_trx}, Nominal=${atmData.nominal_trx}`);
-          return {
+                    return {
             name: periodName,
             Fee: atmData.fee || 0,
             VolumeTransaksi: atmData.volume_trx || 0,
             NominalTransaksi: atmData.nominal_trx || 0,
           };
         } else {
-          console.warn(`[BarChartCard.fetchChartDataForPeriod] No specific ATM data found for ATM ID ${targetAtmId} in period ${periodId}. This period's data will be skipped for the chart.`);
-          return null;
+                    return null;
         }
       } else {
         // Ini akan menangkap kasus jika message bukan success atau struktur data tidak sesuai ekspektasi
-        console.warn(`[BarChartCard.fetchChartDataForPeriod] API response structure not as expected for period ${periodId}. Result:`, result);
-        return null;
+                return null;
       }
     } catch (err) {
       console.error(`[BarChartCard.fetchChartDataForPeriod] Error during fetch or processing for period ${periodId}:`, err);
@@ -102,13 +92,11 @@ const BarChartCard = ({ selectedPeriodId, selectedAtmId, atmBranchId, getAccessT
       setError(null);
       setApiChartData([]);
 
-      console.log(`[BarChartCard.useEffect] Props received: selectedPeriodId=${selectedPeriodId}, selectedAtmId=${selectedAtmId}, atmBranchId=${atmBranchId}`);
-
+      
       if (!selectedPeriodId ) {
         setLoading(false);
         setError("Pilih ATM untuk melihat performa historis."); 
-        console.warn("[BarChartCard.useEffect] Required props missing. Cannot load chart.");
-        return;
+                return;
       }
 
       try {
@@ -117,8 +105,7 @@ const BarChartCard = ({ selectedPeriodId, selectedAtmId, atmBranchId, getAccessT
           promises.push(fetchChartDataForPeriod(i, atmBranchId, selectedAtmId));
         }
 
-        console.log(`[BarChartCard.useEffect] Initiating Promise.all for ${promises.length} periods.`);
-        const results = await Promise.all(promises);
+                const results = await Promise.all(promises);
         console.log("[BarChartCard.useEffect] Raw results from all fetches (including nulls):", results);
         
         const validData = results.filter(Boolean).sort((a, b) => {
@@ -132,8 +119,7 @@ const BarChartCard = ({ selectedPeriodId, selectedAtmId, atmBranchId, getAccessT
 
         if (validData.length === -1) {
           setError(`Tidak ada data historis untuk ATM ini pada ${selectedPeriodId} periode terakhir.`); 
-          console.warn(`[BarChartCard.useEffect] No valid historical data found for ATM ID ${selectedAtmId} across ${selectedPeriodId} periods.`);
-        }
+                  }
 
       } catch (err) {
         console.error("[BarChartCard.useEffect] Error in loadChartData useEffect:", err);

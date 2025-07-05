@@ -69,7 +69,7 @@ const RelocationComponent = () => {
 
   const commonHeaders = useMemo(() => {
     const token = getAccessToken();
-    console.log("Memoized commonHeaders token:", token ? "Token present" : "Token missing");
+    ("Memoized commonHeaders token:", token ? "Token present" : "Token missing");
     return {
       'Authorization': `Bearer ${token}`,
       "ngrok-skip-browser-warning": "true",
@@ -92,8 +92,7 @@ const RelocationComponent = () => {
 
     places.forEach(place => {
       if (!place.geometry || !place.geometry.location || typeof place.geometry.location.lat === 'undefined' || typeof place.geometry.location.lng === 'undefined') {
-        console.warn('Invalid public place data, skipping:', place);
-        return;
+                return;
       }
 
       const distance = calculateDistance(targetLat, targetLng, place.geometry.location.lat, place.geometry.location.lng);
@@ -147,16 +146,16 @@ const RelocationComponent = () => {
   useEffect(() => {
     const loadGoogleMapsAPI = () => {
       if (window.google && window.google.maps && window.google.maps.places) {
-        console.log("Google Maps API already loaded.");
+        ("Google Maps API already loaded.");
         if (!autocompleteService.current) {
           autocompleteService.current = new window.google.maps.places.AutocompleteService();
-          console.log("AutocompleteService initialized.");
+          ("AutocompleteService initialized.");
         }
         if (!placesService.current) {
           const dummyDiv = document.createElement('div');
           document.body.appendChild(dummyDiv);
           placesService.current = new window.google.maps.places.PlacesService(dummyDiv);
-          console.log("PlacesService initialized.");
+          ("PlacesService initialized.");
         }
         return;
       }
@@ -173,18 +172,18 @@ const RelocationComponent = () => {
         return;
       }
 
-      console.log("Loading Google Maps API script...");
+      ("Loading Google Maps API script...");
       const script = document.createElement("script");
       script.src = `https://maps.googleapis.com/maps/api/js?key=${Maps_API_KEY}&libraries=places`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
-        console.log("Google Maps API script loaded successfully.");
+        ("Google Maps API script loaded successfully.");
         autocompleteService.current = new window.google.maps.places.AutocompleteService();
         const dummyDiv = document.createElement('div');
         document.body.appendChild(dummyDiv);
         placesService.current = new window.google.maps.places.PlacesService(dummyDiv);
-        console.log("Google Maps services initialized after script load.");
+        ("Google Maps services initialized after script load.");
       };
       script.onerror = () => {
         console.error("Failed to load Google Maps API script.");
@@ -204,7 +203,7 @@ const RelocationComponent = () => {
 
 
   const updateSelectedLocationFromMap = useCallback(async (lat, lng) => {
-    console.log("updateSelectedLocationFromMap called with:", { lat, lng });
+    ("updateSelectedLocationFromMap called with:", { lat, lng });
     setAnalysisResult(null);
     setNearbyBJBBranches([]);
     setNearbyOtherBanks([]);
@@ -214,12 +213,12 @@ const RelocationComponent = () => {
     });
 
     try {
-      console.log(`Sending reverse-geocode request to ${BACKEND_PROXY_URL}/maps/reverse-geocode`);
+      (`Sending reverse-geocode request to ${BACKEND_PROXY_URL}/maps/reverse-geocode`);
       const response = await axios.post(`${BACKEND_PROXY_URL}/maps/reverse-geocode`, { lat, lng }, {
         headers: { "ngrok-skip-browser-warning": "true" }
       });
       const data = response.data;
-      console.log("Reverse geocode response:", data);
+      ("Reverse geocode response:", data);
 
       const address = data.results[0]?.formatted_address || `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
       const name = data.results[0]?.address_components?.find(comp => comp.types.includes('establishment') || comp.types.includes('point_of_interest'))?.long_name || address;
@@ -263,7 +262,7 @@ const RelocationComponent = () => {
   }, [toast]);
 
   const searchLocations = (query) => {
-    console.log("searchLocations called with query:", query);
+    ("searchLocations called with query:", query);
     if (!query || query.length < 3) {
       setLocationSuggestions([]);
       setShowSuggestions(false);
@@ -271,8 +270,7 @@ const RelocationComponent = () => {
     }
 
     if (!autocompleteService.current) {
-      console.warn("Google Maps AutocompleteService not yet loaded. Cannot search locations.");
-      toast({
+            toast({
         title: "Peringatan",
         description: "Layanan pencarian lokasi belum siap. Coba lagi sebentar.",
         status: "info",
@@ -291,7 +289,7 @@ const RelocationComponent = () => {
       },
       (predictions, status) => {
         setIsLoadingSuggestions(false);
-        console.log("Autocomplete predictions status:", status, "predictions:", predictions);
+        ("Autocomplete predictions status:", status, "predictions:", predictions);
         if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
           setLocationSuggestions(predictions.slice(0, 5));
           setShowSuggestions(true);
@@ -312,7 +310,7 @@ const RelocationComponent = () => {
   };
 
   const getLocationDetails = async (placeId, description) => {
-    console.log("getLocationDetails called for placeId:", placeId, "description:", description);
+    ("getLocationDetails called for placeId:", placeId, "description:", description);
     setAnalysisResult(null);
     setNearbyBJBBranches([]);
     setNearbyOtherBanks([]);
@@ -322,7 +320,7 @@ const RelocationComponent = () => {
     });
 
     try {
-      console.log(`Fetching place details for placeId: ${placeId} from ${BACKEND_PROXY_URL}/maps/place-details/${placeId}`);
+      (`Fetching place details for placeId: ${placeId} from ${BACKEND_PROXY_URL}/maps/place-details/${placeId}`);
       const response = await axios.get(
         `${BACKEND_PROXY_URL}maps/place-details/${placeId}`,
         {
@@ -332,7 +330,7 @@ const RelocationComponent = () => {
         }
       );
       const data = response.data;
-      console.log("Place details response:", data);
+      ("Place details response:", data);
 
       if (data.result && data.result.geometry) {
         const location = {
@@ -373,30 +371,30 @@ const RelocationComponent = () => {
   };
 
     const performCBAAnalysis = async (location) => {
-    console.log("performCBAAnalysis called with location:", location);
+    ("performCBAAnalysis called with location:", location);
     setIsAnalyzing(true);
-    console.log("Log: State isAnalyzing set to true.");
+    ("Log: State isAnalyzing set to true.");
     setAnalysisResult(null);
-    console.log("Log: Analysis result cleared."); // Log ini sudah Anda lihat
+    ("Log: Analysis result cleared."); // Log ini sudah Anda lihat
 
     // ************ LOGGING EKSTRA UNTUK DEBUGGING ************
-    console.log("Log: About to call setError(null)."); // LOG BARU
+    ("Log: About to call setError(null)."); // LOG BARU
     // setError(null);
-    console.log("Log: setError(null) executed."); // LOG BARU
+    ("Log: setError(null) executed."); // LOG BARU
     // *******************************************************
 
     setNearbyBJBBranches([]);
-    console.log("Log: Nearby BJB branches cleared.");
+    ("Log: Nearby BJB branches cleared.");
     setNearbyOtherBanks([]);
-    console.log("Log: Nearby other banks cleared.");
+    ("Log: Nearby other banks cleared.");
     setNearbyCommonPlaces({
       schools: [], supermarkets: [], markets: [], universities: [],
       hotels: [], pharmacy: [], housingComplexes: [], restaurants: [], malls: []
     });
-    console.log("Log: Nearby common places cleared.");
+    ("Log: Nearby common places cleared.");
 
     try {
-      console.log("Log: Entering try block in performCBAAnalysis.");
+      ("Log: Entering try block in performCBAAnalysis.");
 
       // Periksa validasi dengan lebih detail
       if (!location) {
@@ -407,11 +405,11 @@ const RelocationComponent = () => {
         console.error(`Log: Validation failed: location.lat or location.lng is not a number. Lat Type: ${typeof location.lat}, Lat Value: ${location.lat}, Lng Type: ${typeof location.lng}, Lng Value: ${location.lng}`);
         throw new Error("Lokasi tidak valid untuk analisis (latitude atau longitude bukan angka).");
       }
-      console.log("Log: Location validation passed.");
+      ("Log: Location validation passed.");
 
-      console.log(`Log: Attempting to send analyze-relocation request to ${BASE_API_URL}/analyze-relocation`);
-      console.log("Log: Request payload:", { latitude: location.lat, longitude: location.lng });
-      console.log("Log: Request headers:", commonHeaders);
+      (`Log: Attempting to send analyze-relocation request to ${BASE_API_URL}/analyze-relocation`);
+      ("Log: Request payload:", { latitude: location.lat, longitude: location.lng });
+      ("Log: Request headers:", commonHeaders);
 
       const response = await axios.post(
         `${BASE_API_URL}/analyze-relocation`,
@@ -419,7 +417,7 @@ const RelocationComponent = () => {
         { headers: commonHeaders }
       );
 
-      console.log("Log: Analyze Relocation API Response:", response.data);
+      ("Log: Analyze Relocation API Response:", response.data);
 
       if (response.data && response.data.data) {
         const { nearest_branches, neaerest_competitor_atms, nearest_atms, public_places } = response.data.data;
@@ -530,17 +528,17 @@ const RelocationComponent = () => {
       });
     } finally {
       setIsAnalyzing(false);
-      console.log("Log: performCBAAnalysis finished. isAnalyzing set to false.");
+      ("Log: performCBAAnalysis finished. isAnalyzing set to false.");
     }
   };
 
   const handleAnalyze = () => {
-    console.log("handleAnalyze called.");
+    ("handleAnalyze called.");
     if (selectedLocation) {
-      console.log("Selected location is available:", selectedLocation);
+      ("Selected location is available:", selectedLocation);
       performCBAAnalysis(selectedLocation);
     } else {
-      console.log("No location selected yet.");
+      ("No location selected yet.");
       toast({
         title: "Lokasi Belum Dipilih",
         description: "Silakan pilih lokasi terlebih dahulu",
@@ -554,7 +552,7 @@ const RelocationComponent = () => {
   const handleLocationChange = (e) => {
     const value = e.target.value;
     setLocationName(value);
-    console.log("Location input changed to:", value);
+    ("Location input changed to:", value);
     if (value.length >= 3) {
       searchLocations(value);
     } else {
@@ -564,7 +562,7 @@ const RelocationComponent = () => {
   };
 
   const handleLocationSelect = async (suggestion) => {
-    console.log("Location suggestion selected:", suggestion);
+    ("Location suggestion selected:", suggestion);
     setAnalysisResult(null);
     setNearbyBJBBranches([]);
     setNearbyOtherBanks([]);
@@ -575,7 +573,7 @@ const RelocationComponent = () => {
 
     const location = await getLocationDetails(suggestion.place_id, suggestion.description);
     if (location) {
-      console.log("Successfully got location details:", location);
+      ("Successfully got location details:", location);
       // After location is selected, the map will update.
       // Analysis will be triggered when the user clicks the "Analyze" button.
     } else {

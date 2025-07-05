@@ -65,8 +65,7 @@ const MapViewPage = ({ selectedPeriod }) => {
     useEffect(() => {
             const fetchKanwilOptions = async () => {
                 if (!commonHeaders.Authorization || commonHeaders.Authorization === 'Bearer null' || (branchId === null || branchId === undefined)) {
-                    console.warn("MapViewPage: Skipping fetchKanwilOptions - Token or Branch ID not available yet.");
-                    setKanwilOptions([{ value: '', label: 'Loading Kanwil...' }]);
+                                        setKanwilOptions([{ value: '', label: 'Loading Kanwil...' }]);
                     return;
                 }
                 try {
@@ -76,7 +75,7 @@ const MapViewPage = ({ selectedPeriod }) => {
                         let formattedOptions = [];
                         const tempKanwilToChildrenMap = {};
     
-                        console.log("MapViewPage: All Branches API Response:", allBranches); // LOG PENTING INI
+                        ("MapViewPage: All Branches API Response:", allBranches); // LOG PENTING INI
     
                         if (branchId === 0) { // Jika user adalah Admin/Global
                             formattedOptions.push({ value: '', label: 'Semua Kanwil' }); 
@@ -85,7 +84,7 @@ const MapViewPage = ({ selectedPeriod }) => {
                             const rootKanwils = allBranches.filter(branch =>
                                 branch.parent_id === null || String(branch.parent_id) === '0' || branch.parent_id === 0 // Lebih robust untuk parent_id
                             );
-                            console.log("MapViewPage: Identified Root Kanwils:", rootKanwils); // LOG PENTING INI
+                            ("MapViewPage: Identified Root Kanwils:", rootKanwils); // LOG PENTING INI
     
                             rootKanwils.sort((a, b) => a.name.localeCompare(b.name));
                             rootKanwils.forEach(kanwil => {
@@ -144,8 +143,8 @@ const MapViewPage = ({ selectedPeriod }) => {
                         
                         setKanwilToChildrenMap(tempKanwilToChildrenMap); 
                         setKanwilOptions(formattedOptions);
-                        console.log("MapViewPage: Final kanwilToChildrenMap:", tempKanwilToChildrenMap); // LOG PENTING INI
-                        console.log("MapViewPage: Final kanwilOptions:", formattedOptions); // LOG PENTING INI
+                        ("MapViewPage: Final kanwilToChildrenMap:", tempKanwilToChildrenMap); // LOG PENTING INI
+                        ("MapViewPage: Final kanwilOptions:", formattedOptions); // LOG PENTING INI
     
                     } else {
                         console.error('MapViewPage: Branches data format unexpected. Missing "data.branches" array.');
@@ -167,20 +166,17 @@ const MapViewPage = ({ selectedPeriod }) => {
 
             // Logika skipping fetchAllData bisa disederhanakan sedikit
             if (!commonHeaders.Authorization || commonHeaders.Authorization === 'Bearer null') {
-                console.warn("Skipping fetchAllData: Token not available.");
-                setLoading(false);
+                                setLoading(false);
                 setError("Authentication token not available. Please log in.");
                 return;
             }
             // Tambahkan kondisi untuk menunggu kanwilOptions dan kanwilToChildrenMap terisi
             if (kanwilOptions.length === 0 && branchId === 0) { // Hanya menunggu jika admin dan options belum terisi
-                console.warn("Skipping fetchAllData: Kanwil options not loaded yet for admin user.");
-                setLoading(false);
+                                setLoading(false);
                 return;
             }
             if (selectedKanwilId === '' && branchId !== 0) { // Menunggu jika user spesifik dan selectedKanwilId belum diatur
-                console.warn("Skipping fetchAllData: User-specific Kanwil ID not yet set.");
-                setLoading(false);
+                                setLoading(false);
                 setError("Memuat Kanwil spesifik pengguna...");
                 return;
             }

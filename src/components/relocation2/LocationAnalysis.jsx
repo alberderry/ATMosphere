@@ -370,7 +370,7 @@ const LocationAnalysis = () => {
         const fetchExistingRelocation = async () => {
             // Tunggu hingga otentikasi selesai
             if (authLoading) {
-                // console.log("LocationAnalysis: Waiting for auth to load...");
+                // ("LocationAnalysis: Waiting for auth to load...");
                 return;
             }
 
@@ -471,8 +471,7 @@ const LocationAnalysis = () => {
         const breakdown = analysisResult.breakdown_analysis;
 
         if (!breakdown || Object.keys(breakdown).length === 0) {
-            console.warn("breakdown_analysis is invalid or empty, returning placeholders.");
-            return [
+                        return [
                 { icon: "", title: "Customer Closeness Score", score: 0, prediction: "No data", colorScheme: "gray" },
                 { icon: "📊", title: "Demographic Score", score: 0, prediction: "No data", colorScheme: "gray" },
                 { icon: "🚗", title: "Accessibility Score", score: 0, prediction: "No data", colorScheme: "gray" },
@@ -546,8 +545,7 @@ const LocationAnalysis = () => {
 
     const paginate = (data, page, itemsPerPage) => {
         if (!Array.isArray(data)) {
-            console.warn("Paginate received non-array data:", data);
-            return [];
+                        return [];
         }
         const startIndex = (page - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;

@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 
 const MapViewCard = ({ 
   loading, 
-  error, 
+  // error, 
   atmLocations, 
   atmPerformances, 
   getTierColor,
@@ -115,12 +115,12 @@ const MapViewCard = ({
               <Text>Memuat data ATM...</Text>
             </VStack>
           </Flex>
-        ) : error ? (
-          <Flex h="full" justifyContent="center" alignItems="center" flexDirection="column" p={4}>
+        /* ) : error ? ( */
+          /* <Flex h="full" justifyContent="center" alignItems="center" flexDirection="column" p={4}>
             <Text color="red.500" fontWeight="bold" mb={2}>Terjadi Kesalahan Saat Memuat Data:</Text>
             <Text color="red.400" textAlign="center" fontSize="sm">{error}</Text>
             <Text color="gray.500" mt={4} fontSize="xs">Silakan cek URL API Anda atau pastikan server berjalan dengan benar.</Text>
-          </Flex>
+          </Flex> */
         ) : (
           <MapViewComponent atmLocations={combinedAtmLocations} userLocation={null} getTierColor={getTierColor} />
         )}

@@ -58,7 +58,7 @@ const Login = () => {
         isClosable: true,
         position: "top",
       });
-      console.log("Login successful, redirecting to dashboard...");
+      ("Login successful, redirecting to dashboard...");
       navigate('/'); // Arahkan pengguna ke halaman utama (Dashboard) setelah login berhasil
     } else {
       toast({

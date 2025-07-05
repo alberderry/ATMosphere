@@ -28,12 +28,12 @@ const MapComponent = ({ atmLocations = [], getTierColor, activeView, userLocatio
   useEffect(() => {
     window.initMap = () => {
       setIsGoogleMapsLoaded(true);
-      console.log('Google Maps API berhasil dimuat.');
+      ('Google Maps API berhasil dimuat.');
     };
 
     if (window.google && window.google.maps) {
       setIsGoogleMapsLoaded(true);
-      console.log('Google Maps API sudah tersedia.');
+      ('Google Maps API sudah tersedia.');
       return;
     }
 
@@ -44,7 +44,7 @@ const MapComponent = ({ atmLocations = [], getTierColor, activeView, userLocatio
       script.async = true;
       script.defer = true;
       document.head.appendChild(script);
-      console.log('Menambahkan script Google Maps API...');
+      ('Menambahkan script Google Maps API...');
     }
 
     return () => {
@@ -68,14 +68,14 @@ const MapComponent = ({ atmLocations = [], getTierColor, activeView, userLocatio
 
       onAdd() {
         this.projectionReady = true;
-        console.log('CustomOverlay: onAdd - projection ready.');
+        ('CustomOverlay: onAdd - projection ready.');
       }
 
       draw() { /* No op */ }
 
       onRemove() {
         this.projectionReady = false;
-        console.log('CustomOverlay: onRemove.');
+        ('CustomOverlay: onRemove.');
       }
 
       getMapCanvasProjection() {
@@ -92,7 +92,7 @@ const MapComponent = ({ atmLocations = [], getTierColor, activeView, userLocatio
       return;
     }
 
-    console.log('Menginisialisasi peta Google Maps...');
+    ('Menginisialisasi peta Google Maps...');
 
     const map = new window.google.maps.Map(
       mapRef.current,
@@ -115,7 +115,7 @@ const MapComponent = ({ atmLocations = [], getTierColor, activeView, userLocatio
       overlayRef.current.setMap(map);
     }
 
-    console.log('Peta Google Maps berhasil diinisialisasi.');
+    ('Peta Google Maps berhasil diinisialisasi.');
 
     return () => {
       if (mapInstanceRef.current) {
@@ -127,7 +127,7 @@ const MapComponent = ({ atmLocations = [], getTierColor, activeView, userLocatio
         mapInstanceRef.current = null;
         markersRef.current.forEach(marker => marker.setMap(null));
         markersRef.current = [];
-        console.log('Peta Google Maps telah di-cleanup.');
+        ('Peta Google Maps telah di-cleanup.');
       }
     };
   }, [isGoogleMapsLoaded, userLocation, CustomOverlay]); // Tambahkan CustomOverlay ke dependensi
@@ -137,8 +137,7 @@ const MapComponent = ({ atmLocations = [], getTierColor, activeView, userLocatio
   const getPixelPosition = useCallback((latLng) => {
     // Pastikan overlay sudah siap dan proyeksinya tersedia
     if (!overlayRef.current || !overlayRef.current.projectionReady) {
-      console.warn("Overlay projection not ready.");
-      return null;
+            return null;
     }
     const mapCanvasProjection = overlayRef.current.getMapCanvasProjection();
     // fromLatLngToContainerPixel memberikan koordinat relatif terhadap div peta

@@ -50,7 +50,7 @@ const AtmDetailModal = ({ isOpen, onClose, atmId }) => {
       setError(null);
       try {
         const response = await axios.get(`${baseUrl}/atms/${atmId}`, { headers: commonHeaders });
-        console.log("Detail ATM Response:", response.data);
+        ("Detail ATM Response:", response.data);
         if (response.data && response.data.data) {
           setAtmDetail(response.data.data);
         } else {

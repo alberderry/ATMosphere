@@ -13,11 +13,7 @@ const AtmBankLainTab = ({
     userLongitude // Menerima longitude dari lokasi yang dipilih pengguna
 }) => {
     // Tambahkan logging untuk memverifikasi prop
-    console.log("AtmBankLainTab - received analysisResult:", analysisResult);
-    console.log("AtmBankLainTab - received paginatedAtmBankLain:", paginatedAtmBankLain);
-    console.log("AtmBankLainTab - received userLatitude:", userLatitude);
-    console.log("AtmBankLainTab - received userLongitude:", userLongitude);
-
+                
     // Menggunakan properti yang sesuai dari analysisResult, perhatikan typo jika ada
     // Misalnya, jika API mengembalikan 'neaerest_competitor_atms' dan bukan 'nearest_competitor_atms'
     const competitorAtmsData = analysisResult?.nearest_competitor_atms || analysisResult?.neaerest_competitor_atms || [];

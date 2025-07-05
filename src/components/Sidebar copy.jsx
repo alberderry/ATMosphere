@@ -289,7 +289,7 @@ const Sidebar = () => {
           <MenuItem
             icon={FiLogOut}
             onClick={() => {
-              console.log('Logout clicked!');
+              ('Logout clicked!');
               navigate('/');
             }}
           >

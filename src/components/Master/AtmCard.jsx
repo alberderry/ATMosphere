@@ -58,8 +58,7 @@ const AtmCard = ({ atm, onCardClick, onDelete }) => {
 
   // Pastikan atmId valid sebelum melanjutkan
   if (!atmId) {
-    console.warn("AtmCard received an ATM object without a valid ID. Skipping render.");
-    return null;
+        return null;
   }
 
   const currentTierStyles = getTierStyles(tier);

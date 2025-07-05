@@ -55,8 +55,7 @@ const getPeriodId = (periodString) => {
             return 4;
         // Tambahkan case lain jika ada periode lain
         default:
-            console.warn(`[getPeriodId] Period string "${periodString}" not mapped to a known period ID. Defaulting to 3.`);
-            return 1; // Default ke periode 3 jika tidak cocok
+                        return 1; // Default ke periode 3 jika tidak cocok
     }
 };
 
@@ -90,14 +89,14 @@ const CBAAnalyticsComponent = ({ selectedPeriod }) => { // Menerima selectedPeri
 
             const periodId = getPeriodId(selectedPeriod); // Gunakan prop selectedPeriod
             
-            console.log("[CBAAnalyticsComponent] Mulai fetching data...");
-            console.log("  ATM ID (dari URL):", atmId);
-            console.log("  Selected Period String (dari prop):", selectedPeriod);
-            console.log("  Mapped Period ID:", periodId);
+            ("[CBAAnalyticsComponent] Mulai fetching data...");
+            ("  ATM ID (dari URL):", atmId);
+            ("  Selected Period String (dari prop):", selectedPeriod);
+            ("  Mapped Period ID:", periodId);
 
             try {
                 const apiUrl = `${BASE_URL}/atm-cba?period_id=${periodId}&atm_id=${atmId}`;
-                console.log("[CBAAnalyticsComponent] API URL yang akan dipanggil:", apiUrl);
+                ("[CBAAnalyticsComponent] API URL yang akan dipanggil:", apiUrl);
 
                 const response = await fetch(apiUrl, {
                     method: 'GET',
@@ -109,7 +108,7 @@ const CBAAnalyticsComponent = ({ selectedPeriod }) => { // Menerima selectedPeri
                 });
                 
                 const data = await response.json();
-                console.log("[CBAAnalyticsComponent] Raw API Response:", data); // Log respons mentah dari API
+                ("[CBAAnalyticsComponent] Raw API Response:", data); // Log respons mentah dari API
 
                 if (!response.ok) {
                     console.error("[CBAAnalyticsComponent] API Error Response (status non-OK):", data);
@@ -118,10 +117,9 @@ const CBAAnalyticsComponent = ({ selectedPeriod }) => { // Menerima selectedPeri
 
                 if (data.data) {
                     setCbaData(data.data);
-                    console.log("[CBAAnalyticsComponent] Data CBA berhasil disimpan ke state:", data.data);
+                    ("[CBAAnalyticsComponent] Data CBA berhasil disimpan ke state:", data.data);
                 } else {
-                    console.warn("[CBAAnalyticsComponent] Respons API OK, tetapi data.data kosong atau null:", data);
-                    toast({
+                                        toast({
                         title: "Data CBA Tidak Ditemukan",
                         description: `Data CBA untuk ATM dengan ID "${atmId}" pada periode "${selectedPeriod}" tidak ditemukan.`,
                         status: "info",
@@ -141,7 +139,7 @@ const CBAAnalyticsComponent = ({ selectedPeriod }) => { // Menerima selectedPeri
                 setCbaData(null);
             } finally {
                 setLoading(false);
-                console.log("[CBAAnalyticsComponent] Fetching selesai. Loading diset ke false.");
+                ("[CBAAnalyticsComponent] Fetching selesai. Loading diset ke false.");
             }
         };
 
@@ -149,7 +147,7 @@ const CBAAnalyticsComponent = ({ selectedPeriod }) => { // Menerima selectedPeri
         if (atmId && selectedPeriod) {
             fetchCBAData();
         } else {
-            console.log("[CBAAnalyticsComponent] Skipping fetch: atmId atau selectedPeriod belum tersedia.", { atmId, selectedPeriod });
+            ("[CBAAnalyticsComponent] Skipping fetch: atmId atau selectedPeriod belum tersedia.", { atmId, selectedPeriod });
             setLoading(false); // Pastikan loading selesai meskipun tidak ada data
         }
     }, [atmId, selectedPeriod, getAccessToken, toast]); // Tambahkan selectedPeriod ke dependensi useEffect
@@ -168,7 +166,7 @@ const CBAAnalyticsComponent = ({ selectedPeriod }) => { // Menerima selectedPeri
 
     // Ini adalah cek kunci!
     if (!cbaData) {
-        console.log("[CBAAnalyticsComponent] cbaData is falsy after loading, showing 'Data tidak ditemukan'. Current cbaData:", cbaData);
+        ("[CBAAnalyticsComponent] cbaData is falsy after loading, showing 'Data tidak ditemukan'. Current cbaData:", cbaData);
         return (
             <Box p={6}>
                 <Text fontSize="xl" color="gray.500" textAlign="center">
@@ -178,7 +176,7 @@ const CBAAnalyticsComponent = ({ selectedPeriod }) => { // Menerima selectedPeri
         )
     }
 
-    console.log("[CBAAnalyticsComponent] cbaData is valid, rendering analytics.", cbaData);
+    ("[CBAAnalyticsComponent] cbaData is valid, rendering analytics.", cbaData);
 
     // Ekstrak data dari cbaData (ini tetap sama seperti sebelumnya)
     const {
@@ -215,7 +213,7 @@ const CBAAnalyticsComponent = ({ selectedPeriod }) => { // Menerima selectedPeri
                 </Text>
 
                 {/* Informasi Umum ATM */}
-                <Card bg="white" shadow="sm" borderRadius="lg">
+                <Card bg="white" shadow="sm" borderRadius="25px">
                     <CardHeader pb={2}>
                         <HStack justify="space-between" align="center">
                             <Heading size="md" color="gray.700">
@@ -265,7 +263,7 @@ const CBAAnalyticsComponent = ({ selectedPeriod }) => { // Menerima selectedPeri
                 </Card>
 
                 {/* Bagian Biaya (Cost) */}
-                <Card bg="white" shadow="sm" borderRadius="lg">
+                <Card bg="white" shadow="sm" borderRadius="25px">
                     <CardHeader pb={2}>
                         <Heading size="md" color="red.600">
                             Biaya (Cost)
@@ -302,7 +300,7 @@ const CBAAnalyticsComponent = ({ selectedPeriod }) => { // Menerima selectedPeri
                 </Card>
 
                 {/* Bagian Manfaat (Benefit) */}
-                <Card bg="white" shadow="sm" borderRadius="lg">
+                <Card bg="white" shadow="sm" borderRadius="25px">
                     <CardHeader pb={2}>
                         <Heading size="md" color="green.600">
                             Manfaat (Benefit)
@@ -330,7 +328,7 @@ const CBAAnalyticsComponent = ({ selectedPeriod }) => { // Menerima selectedPeri
                 </Card>
 
                 {/* Ringkasan Analisis */}
-                <Card bg="white" shadow="sm" borderRadius="lg">
+                <Card bg="white" shadow="sm" borderRadius="25px" mb="50px">
                     <CardHeader pb={2}>
                         <Heading size="md" color="blue.600">
                             Ringkasan Analisis CBA

@@ -67,13 +67,13 @@ const InteractiveMapCard = ({
     // Callback function yang akan dipanggil setelah script Google Maps dimuat
     window.initInteractiveMap = () => {
       setGoogleMapsApiLoaded(true);
-      console.log('Google Maps API berhasil dimuat.');
+      ('Google Maps API berhasil dimuat.');
     };
 
     // Periksa jika Google Maps API sudah dimuat di window
     if (window.google && window.google.maps) { // Tidak perlu window.google.maps.visualization
       setGoogleMapsApiLoaded(true);
-      console.log('Google Maps API sudah tersedia.');
+      ('Google Maps API sudah tersedia.');
       return;
     }
 
@@ -87,7 +87,7 @@ const InteractiveMapCard = ({
       script.async = true; // Muat secara asynchronous
       script.defer = true; // Tunda eksekusi sampai parsing HTML selesai
       document.head.appendChild(script);
-      console.log('Menambahkan script Google Maps API...');
+      ('Menambahkan script Google Maps API...');
     }
 
     // Fungsi cleanup saat komponen di-unmount

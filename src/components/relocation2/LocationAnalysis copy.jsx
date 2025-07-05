@@ -94,7 +94,7 @@ const LocationAnalysis = () => {
 
   const commonHeaders = useMemo(() => {
     const token = getAccessToken();
-    console.log("Memoized commonHeaders token:", token ? "Token present" : "Token missing");
+    ("Memoized commonHeaders token:", token ? "Token present" : "Token missing");
     return {
       'Authorization': `Bearer ${token}`,
       "ngrok-skip-browser-warning": "true",
@@ -148,18 +148,18 @@ const LocationAnalysis = () => {
         const loadGoogleMapsAPI = () => {
             // Periksa apakah API sudah dimuat
             if (window.google && window.google.maps && window.google.maps.places) {
-                console.log("Google Maps API already loaded.");
+                ("Google Maps API already loaded.");
                 // Inisialisasi layanan jika belum
                 if (!autocompleteService.current) {
                     autocompleteService.current = new window.google.maps.places.AutocompleteService();
-                    console.log("AutocompleteService initialized.");
+                    ("AutocompleteService initialized.");
                 }
                 if (!placesService.current) {
                     // PlacesService membutuhkan div DOM, meskipun dummy.
                     const dummyDiv = document.createElement('div');
                     document.body.appendChild(dummyDiv); // Penting: harus ada di DOM
                     placesService.current = new window.google.maps.places.PlacesService(dummyDiv);
-                    console.log("PlacesService initialized.");
+                    ("PlacesService initialized.");
                 }
                 setMapLoaded(true); // Set mapLoaded ke true jika API sudah ada
                 return;
@@ -177,20 +177,20 @@ const LocationAnalysis = () => {
                 return;
             }
 
-            console.log("Loading Google Maps API script...");
+            ("Loading Google Maps API script...");
             const script = document.createElement("script");
             script.src = `https://maps.googleapis.com/maps/api/js?key=${Maps_API_KEY}&libraries=places`;
             script.async = true;
             script.defer = true;
             script.onload = () => {
-                console.log("Google Maps API script loaded successfully.");
+                ("Google Maps API script loaded successfully.");
                 // Inisialisasi layanan setelah script dimuat
                 autocompleteService.current = new window.google.maps.places.AutocompleteService();
                 // PlacesService membutuhkan div DOM, meskipun dummy.
                 const dummyDiv = document.createElement('div');
                 document.body.appendChild(dummyDiv);
                 placesService.current = new window.google.maps.places.PlacesService(dummyDiv);
-                console.log("Google Maps services initialized after script load.");
+                ("Google Maps services initialized after script load.");
                 setMapLoaded(true); // Set mapLoaded ke true setelah API dimuat
             };
             script.onerror = () => {
@@ -213,7 +213,7 @@ const LocationAnalysis = () => {
        return () => {
             if (dummyDiv && dummyDiv.parentNode) { // Directly remove dummyDiv if it exists
                 dummyDiv.parentNode.removeChild(dummyDiv);
-                console.log("Dummy div removed from DOM.");
+                ("Dummy div removed from DOM.");
             }
         };
 

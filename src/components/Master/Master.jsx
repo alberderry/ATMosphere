@@ -104,15 +104,14 @@ const Master = () => {
       setCurrentPage(page);
 
       // --- DEBUGGING LOGS (Bisa dihapus setelah yakin berfungsi) ---
-      console.log("API Response Data:", response.data.data);
-      console.log("Total Row from API (from page_info):", totalCountFromApi); // Log baru
-      console.log("Calculated Total Pages:", Math.ceil(totalCountFromApi / ITEMS_PER_PAGE) || 1);
-      console.log("Current Page:", page);
+      ("API Response Data:", response.data.data);
+      ("Total Row from API (from page_info):", totalCountFromApi); // Log baru
+      ("Calculated Total Pages:", Math.ceil(totalCountFromApi / ITEMS_PER_PAGE) || 1);
+      ("Current Page:", page);
       // -----------------------------------------------------------
 
     } else {
-      console.warn("API response.data.data is empty or malformed:", response.data);
-      setAtms([]);
+            setAtms([]);
       setTotalPages(1);
       setTotalItems(0);
     }

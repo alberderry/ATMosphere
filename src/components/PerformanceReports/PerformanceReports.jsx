@@ -79,21 +79,20 @@ const PerformanceReports = ({ selectedPeriod }) => {
 
   const currentPeriodId = useMemo(() => {
     const period = periods.find(p => p.name === selectedPeriod);
-    console.log("PerformanceReports: currentPeriodId calculated as", period?.id, "for selectedPeriod:", selectedPeriod);
+    ("PerformanceReports: currentPeriodId calculated as", period?.id, "for selectedPeriod:", selectedPeriod);
     return period?.id;
   }, [selectedPeriod]);
 
   const userBranchId = useMemo(() => {
     const id = userProfile?.branch_id?.id ?? 0;
-    console.log("PerformanceReports: userBranchId from profile:", id);
+    ("PerformanceReports: userBranchId from profile:", id);
     return id;
   }, [userProfile]);
 
   const fetchApiAtmPerformanceData = useCallback(async (periodId, currentBranchId) => {
-    console.log(`PerformanceReports: fetchApiAtmPerformanceData called for periodId: ${periodId}, branchId: ${currentBranchId}`);
+    (`PerformanceReports: fetchApiAtmPerformanceData called for periodId: ${periodId}, branchId: ${currentBranchId}`);
     if (!periodId || (currentBranchId === null || currentBranchId === undefined)) {
-        console.warn("PerformanceReports: Skipping fetchApiAtmPerformanceData: Period ID or Branch ID not available.");
-        return [];
+                return [];
     }
 
     const authToken = getAccessToken();
@@ -118,7 +117,7 @@ const PerformanceReports = ({ selectedPeriod }) => {
       const textResponse = await response.text();
       try {
         const result = JSON.parse(textResponse);
-        console.log(`PerformanceReports: API response for atms-performance (period ${periodId}, branch ${currentBranchId}):`, result);
+        (`PerformanceReports: API response for atms-performance (period ${periodId}, branch ${currentBranchId}):`, result);
 
         if (result.data && result.data.atm_performances) {
           return result.data.atm_performances.map(item => {
@@ -164,19 +163,17 @@ const PerformanceReports = ({ selectedPeriod }) => {
       setError(null);
       
       if (userBranchId === -1) { // Changed from null/undefined check to 0, assuming 0 is default
-          console.warn("PerformanceReports: Skipping loadApiData: User Branch ID is 0.");
-          setLoading(false);
+                    setLoading(false);
           setError("Branch ID pengguna belum tersedia. Harap masuk kembali atau tunggu.");
           return;
       }
       if (!currentPeriodId) {
-        console.warn("PerformanceReports: Skipping loadApiData: currentPeriodId is null or undefined.");
-        setLoading(false);
+                setLoading(false);
         setError("Periode belum dipilih.");
         return;
       }
 
-      console.log(`PerformanceReports: Loading data for currentPeriodId: ${currentPeriodId}, userBranchId: ${userBranchId}`);
+      (`PerformanceReports: Loading data for currentPeriodId: ${currentPeriodId}, userBranchId: ${userBranchId}`);
       try {
         const currentDataPromise = fetchApiAtmPerformanceData(currentPeriodId, userBranchId);
         const currentIndexInPeriods = periods.findIndex(p => p.id === currentPeriodId);
@@ -195,7 +192,7 @@ const PerformanceReports = ({ selectedPeriod }) => {
           setSelectedAtmIdForDetails(null); 
           setActiveAtmId(null); 
           hasUserSelectedAtmRef.current = false; 
-          console.log("PerformanceReports: No data, resetting selected ID and user selection flag.");
+          ("PerformanceReports: No data, resetting selected ID and user selection flag.");
         } else {
             // Check if selectedAtmIdForDetails is still valid in currentData
             const isSelectedAtmStillPresent = currentData.some(atm => atm.id === selectedAtmIdForDetails);
@@ -205,10 +202,10 @@ const PerformanceReports = ({ selectedPeriod }) => {
                 setSelectedAtmIdForDetails(currentData[0].id);
                 setActiveAtmId(currentData[0].id); 
                 hasUserSelectedAtmRef.current = false; // Reset to allow re-selection logic
-                console.log("PerformanceReports: Auto-selecting first ATM ID:", currentData[0].id, "due to no previous selection or missing ATM.");
+                ("PerformanceReports: Auto-selecting first ATM ID:", currentData[0].id, "due to no previous selection or missing ATM.");
             } else {
               // Keep the currently selected ATM if it's still in the list
-              console.log("PerformanceReports: Keeping previously selected ATM ID:", selectedAtmIdForDetails);
+              ("PerformanceReports: Keeping previously selected ATM ID:", selectedAtmIdForDetails);
             }
         }
 
@@ -255,12 +252,12 @@ const PerformanceReports = ({ selectedPeriod }) => {
         feeChange,
       };
     });
-    console.log("PerformanceReports: filteredAtmDetailsWithChanges updated. Count:", mappedAtms.length);
+    ("PerformanceReports: filteredAtmDetailsWithChanges updated. Count:", mappedAtms.length);
     return mappedAtms;
   }, [apiAtmPerformanceData, prevApiAtmPerformanceData, currentPeriodId, searchTerm, activeAtmId, periods]); // Added periods to dependencies
 
   const handleSelectAtmForDetails = useCallback((atmId) => {
-    console.log("PerformanceReports: handleSelectAtmForDetails called with ID:", atmId);
+    ("PerformanceReports: handleSelectAtmForDetails called with ID:", atmId);
     setSelectedAtmIdForDetails(atmId);
     setActiveAtmId(atmId); 
     hasUserSelectedAtmRef.current = true; // Mark that user explicitly selected an ATM
@@ -271,7 +268,7 @@ const PerformanceReports = ({ selectedPeriod }) => {
   }, []); 
 
   useEffect(() => {
-      console.log("PerformanceReports: selectedAtmIdForDetails (state) changed to:", selectedAtmIdForDetails);
+      ("PerformanceReports: selectedAtmIdForDetails (state) changed to:", selectedAtmIdForDetails);
   }, [selectedAtmIdForDetails]);
 
   const handleExport = useCallback(() => {
@@ -285,7 +282,7 @@ const PerformanceReports = ({ selectedPeriod }) => {
 
   const selectedAtmDetails = useMemo(() => {
     const details = filteredAtmDetailsWithChanges.find(atm => atm.id === selectedAtmIdForDetails);
-    console.log("PerformanceReports: selectedAtmDetails computed:", details);
+    ("PerformanceReports: selectedAtmDetails computed:", details);
     return details;
   }, [filteredAtmDetailsWithChanges, selectedAtmIdForDetails]);
 
