@@ -242,7 +242,7 @@ const Sidebar = () => {
             >
                 <Avatar
                     size="xl"
-                    src={userProfile?.avatar_url || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"}
+                    src={userProfile?.avatar_url || "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.svgrepo.com%2Fsvg%2F452030%2Favatar-default&psig=AOvVaw0ZCZlyl5oCzlknnQZM3eQ7&ust=1751941106452000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCMCMj8LYqY4DFQAAAAAdAAAAABAE"}
                     mb={3}
                 />
                 {loadingProfile ? (
